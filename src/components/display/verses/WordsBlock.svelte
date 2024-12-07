@@ -14,6 +14,7 @@
 	export let value;
 	export let line = null;
 	export let exampleVerse = false;
+	export let hiddenIndex = null;
 
 	const fontSizes = JSON.parse($__userSettings).displaySettings.fontSizes;
 	$: displayIsContinuous = selectableDisplays[$__displayType].continuous;
@@ -104,30 +105,35 @@
 
 <!-- words -->
 {#each { length: value.meta.words } as _, word}
-	<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} />
+	<div style={(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden" : ""}>
+		<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} />
+	</div>
 {/each}
 
 <!-- end icon -->
 {#if $__currentPage != 'mushaf' || ($__currentPage === 'mushaf' && value.words.end_line === line)}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
-		<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
-			<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
-			{#if [1, 4].includes($__fontType)}
-				{value.words.end}
-				<!-- 2: Uthmanic Hafs Mushaf -->
-			{:else if [2, 3].includes($__fontType)}
-				<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">{value.words.end}</span>
-			{/if}
-		</span>
-	</div>
-	{#if displayIsContinuous}
-		<VerseOptionsDropdown page={value.meta.page} />
-	{/if}
+	<div style={(hiddenIndex !== null && value.meta.words >= hiddenIndex) ? "visibility: hidden" : ""}>
+		<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
+			<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+				<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
+				{#if [1, 4].includes($__fontType)}
+					{value.words.end}
+					<!-- 2: Uthmanic Hafs Mushaf -->
+				{:else if [2, 3].includes($__fontType)}
+					<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">{value.words.end}</span>
+				{/if}
+			</span>
+		</div>
 
-	<!-- end icon tooltip -->
-	<Tooltip arrow={false} type="light" class="z-30 inline-flex font-sans font-normal">
-		End of {key}
-	</Tooltip>
+		{#if displayIsContinuous}
+			<VerseOptionsDropdown page={value.meta.page} />
+		{/if}
+
+		<!-- end icon tooltip -->
+		<Tooltip arrow={false} type="light" class="z-30 inline-flex font-sans font-normal">
+			End of {key}
+		</Tooltip>
+	</div>
 {/if}
