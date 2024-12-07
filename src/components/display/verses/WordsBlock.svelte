@@ -15,6 +15,7 @@
 	export let line = null;
 	export let exampleVerse = false;
 	export let hiddenIndex = null;
+	export let wordOnly = false;
 
 	const fontSizes = JSON.parse($__userSettings).displaySettings.fontSizes;
 	$: displayIsContinuous = selectableDisplays[$__displayType].continuous;
@@ -106,7 +107,7 @@
 <!-- words -->
 {#each { length: value.meta.words } as _, word}
 	<div style={(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden" : ""}>
-		<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} />
+		<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
 	</div>
 {/each}
 
