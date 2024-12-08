@@ -2,6 +2,7 @@
 	import VerseOptionsDropdown from '$display/verses/VerseOptionsDropdown.svelte';
 	import Word from '$display/verses/Word.svelte';
 	import Tooltip from '$ui/FlowbiteSvelte/tooltip/Tooltip.svelte';
+	import ArrowDown from '$svgs/ArrowDown.svelte';
 	import { goto } from '$app/navigation';
 	import { selectableDisplays } from '$data/options';
 	import { __currentPage, __fontType, __displayType, __userSettings, __audioSettings, __morphologyKey, __verseKey, __websiteTheme, __morphologyModalVisible } from '$utils/stores';
@@ -16,6 +17,7 @@
 	export let exampleVerse = false;
 	export let hiddenIndex = null;
 	export let wordOnly = false;
+	export let draggableHiddenIndex = false;
 
 	const fontSizes = JSON.parse($__userSettings).displaySettings.fontSizes;
 	$: displayIsContinuous = selectableDisplays[$__displayType].continuous;
@@ -102,21 +104,94 @@
 		${wordAndEndIconCommonClasses}
 		${$__websiteTheme === 1 && `${window.theme('textSecondary')}`}
 	`;
+
+
+	let selectedDraggable = null;
+	let absoluteCursor = false;
+
+	function dragOver(e) {
+		if (e.target != selectedDraggable && !selectedDraggable.contains(e.target)) {
+			var next = e.target.nextSibling;
+			while (next && next.nodeType != Node.ELEMENT_NODE) {
+				next = next.nextSibling;
+			}
+			if (next != selectedDraggable && !selectedDraggable.contains(next)) {
+				if (next) {
+					next.insertBefore(selectedDraggable, null)
+					absoluteCursor = true;
+				} else {
+					e.target.parentNode.insertBefore(selectedDraggable, null);
+					absoluteCursor = false;
+				}
+				hiddenIndex = Array.from(e.target.parentNode.childNodes).filter((n) => n.nodeType == Node.ELEMENT_NODE).indexOf(e.target) + 1;
+			}
+		}
+		e.preventDefault();
+	}
+
+	function dragEnd() {
+		selectedDraggable = null
+	}
+
+	function dragStart(e) {
+		selectedDraggable = e.target
+	}
 </script>
+
+<style>
+	.no-pointer, .no-pointer * {
+		pointer-events: none;
+	}
+
+	.no-ghost {
+		-webkit-touch-callout: none !important;
+		-webkit-user-select: none !important;
+		-webkit-user-drag: none !important;
+		-khtml-user-select: none !important;
+		-moz-user-select: none !important;
+		-ms-user-select: none !important;
+		user-select: none !important;
+	}
+</style>
+
+{#if draggableHiddenIndex}
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div
+		draggable="true" on:dragend={dragEnd} on:dragstart={dragStart} on:dragover={(e) => {e.preventDefault()}}
+		style="{
+			absoluteCursor
+				? "position: absolute; top: 0; right: 0; padding-right: 10px;"
+				: "position: relative; margin-left: -5px; margin-right: 10px;"
+		}"
+		class="no-ghost"
+	>
+		<div style="position: absolute; top: 0; left: 0;">
+			<ArrowDown height="20px" width="20px"/>
+		</div>
+	</div>
+{/if}
 
 <!-- words -->
 {#each { length: value.meta.words } as _, word}
-	<div style="position: relative;">
-		<div style="
-			{(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden;" : ""}
-		">
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div style="position: relative;" on:dragover={dragOver}>
+		<div 
+			class="{(draggableHiddenIndex ? "no-pointer" : "")}"
+			style="
+				{(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden;" : ""}
+				{(draggableHiddenIndex ? "margin-left: 10px;" : "")}
+			"
+		>
 			<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
 		</div>
 		
-		<div style="
-			{(hiddenIndex !== null && word != hiddenIndex) ? "visibility: hidden;" : ""}
-			position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
-		">
+		<div 
+			class="{(draggableHiddenIndex ? "no-pointer" : "")}"
+			style="
+				{(hiddenIndex !== null && word != hiddenIndex) ? "visibility: hidden;" : ""}
+				position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
+			"
+		>
 			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">
 				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
 					...
@@ -130,10 +205,13 @@
 {#if $__currentPage != 'mushaf' || ($__currentPage === 'mushaf' && value.words.end_line === line)}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div style="position: relative;">
-		<div style="
-			{(hiddenIndex !== null && value.meta.words >= hiddenIndex) ? "visibility: hidden;" : ""}
-		">
+	<div style="position: relative;" on:dragover={dragOver}>
+		<div
+			class="{(draggableHiddenIndex ? "no-pointer" : "")}"
+			style="
+				{(hiddenIndex !== null && value.meta.words >= hiddenIndex) ? "visibility: hidden;" : ""}
+			"
+		>
 			<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
 				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
 					<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
@@ -156,10 +234,13 @@
 			</Tooltip>
 		</div>
 
-		<div style="
-			{(hiddenIndex !== null && value.meta.words != hiddenIndex) ? "visibility: hidden;" : ""}
-			position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
-		">
+		<div 
+			class="{(draggableHiddenIndex ? "no-pointer" : "")}"
+			style="
+				{(hiddenIndex !== null && value.meta.words != hiddenIndex) ? "visibility: hidden;" : ""}
+				position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
+			"
+		>
 			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">
 				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
 					...
