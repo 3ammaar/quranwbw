@@ -106,8 +106,23 @@
 
 <!-- words -->
 {#each { length: value.meta.words } as _, word}
-	<div style={(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden" : ""}>
-		<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
+	<div style="position: relative;">
+		<div style="
+			{(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden;" : ""}
+		">
+			<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
+		</div>
+		
+		<div style="
+			{(hiddenIndex !== null && word != hiddenIndex) ? "visibility: hidden;" : ""}
+			position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
+		">
+			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">
+				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+					...
+				</span>
+			</div>
+		</div>
 	</div>
 {/each}
 
@@ -115,26 +130,41 @@
 {#if $__currentPage != 'mushaf' || ($__currentPage === 'mushaf' && value.words.end_line === line)}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div style={(hiddenIndex !== null && value.meta.words >= hiddenIndex) ? "visibility: hidden" : ""}>
-		<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
-			<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
-				<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
-				{#if [1, 4].includes($__fontType)}
-					{value.words.end}
-					<!-- 2: Uthmanic Hafs Mushaf -->
-				{:else if [2, 3].includes($__fontType)}
-					<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">{value.words.end}</span>
-				{/if}
-			</span>
+	<div style="position: relative;">
+		<div style="
+			{(hiddenIndex !== null && value.meta.words >= hiddenIndex) ? "visibility: hidden;" : ""}
+		">
+			<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
+				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+					<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
+					{#if [1, 4].includes($__fontType)}
+						{value.words.end}
+						<!-- 2: Uthmanic Hafs Mushaf -->
+					{:else if [2, 3].includes($__fontType)}
+						<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">{value.words.end}</span>
+					{/if}
+				</span>
+			</div>
+
+			{#if displayIsContinuous}
+				<VerseOptionsDropdown page={value.meta.page} />
+			{/if}
+
+			<!-- end icon tooltip -->
+			<Tooltip arrow={false} type="light" class="z-30 inline-flex font-sans font-normal">
+				End of {key}
+			</Tooltip>
 		</div>
 
-		{#if displayIsContinuous}
-			<VerseOptionsDropdown page={value.meta.page} />
-		{/if}
-
-		<!-- end icon tooltip -->
-		<Tooltip arrow={false} type="light" class="z-30 inline-flex font-sans font-normal">
-			End of {key}
-		</Tooltip>
+		<div style="
+			{(hiddenIndex !== null && value.meta.words != hiddenIndex) ? "visibility: hidden;" : ""}
+			position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
+		">
+			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">
+				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+					...
+				</span>
+			</div>
+		</div>
 	</div>
 {/if}
