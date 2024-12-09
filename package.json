@@ -8,7 +8,8 @@
 		"preview": "vite preview",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"css": "npx tailwindcss -i ./src/app.css -c ./tailwind.config.js -o ./static/css/global.css --watch"
+		"css": "npx tailwindcss -i ./src/app.css -c ./tailwind.config.js -o ./static/css/global.css --watch",
+		"postinstall": "patch-package"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -34,7 +35,10 @@
 	"type": "module",
 	"dependencies": {
 		"@macfja/svelte-persistent-store": "^2.4.1",
+		"dragdroptouch-bug-fixed": "^1.0.8",
 		"party-js": "^2.2.0",
+		"patch-package": "^8.0.0",
+		"svelte-drag-drop-touch": "^0.1.9",
 		"svelte-gestures": "^5.0.4",
 		"svelte-inview": "^4.0.2"
 	}
