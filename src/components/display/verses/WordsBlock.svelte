@@ -112,6 +112,15 @@
 	}
 </style>
 
+{#if hasDraggableCursor}
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div
+	style="position: relative; width: 20px;"
+	on:dragover={onCursorDragOver}
+	class="cursor-word"
+	id="base-cursor-word" />
+{/if}
+
 <!-- words -->
 {#each { length: value.meta.words } as _, word}
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -146,7 +155,7 @@
 {#if $__currentPage != 'mushaf' || ($__currentPage === 'mushaf' && value.words.end_line === line)}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div style="position: relative;" on:dragover={onCursorDragOver} class="cursor-word">
+	<div style="position: relative;" on:dragover={onCursorDragOver} class="cursor-word" id="final-cursor-word">
 		<div
 			class="{(hasDraggableCursor ? "no-pointer" : "")}"
 			style="
