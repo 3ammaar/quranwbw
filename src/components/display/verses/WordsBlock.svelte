@@ -135,10 +135,11 @@
 			<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
 		</div>
 		
+		{#if hiddenIndex !== null}
 		<div 
 			class="{(hasDraggableCursor ? "no-pointer" : "")}"
 			style="
-				{(hiddenIndex !== null && word != hiddenIndex) ? "visibility: hidden;" : ""}
+				{(word != hiddenIndex) ? "visibility: hidden;" : ""}
 				position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
 			"
 		>
@@ -148,6 +149,7 @@
 				</span>
 			</div>
 		</div>
+		{/if}
 	</div>
 {/each}
 
@@ -184,10 +186,11 @@
 			</Tooltip>
 		</div>
 
+		{#if hiddenIndex !== null}
 		<div 
 			class="{(hasDraggableCursor ? "no-pointer" : "")}"
 			style="
-				{(hiddenIndex !== null && value.meta.words != hiddenIndex) ? "visibility: hidden;" : ""}
+				{(value.meta.words != hiddenIndex) ? "visibility: hidden;" : ""}
 				position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
 			"
 		>
@@ -197,5 +200,6 @@
 				</span>
 			</div>
 		</div>
+		{/if}
 	</div>
 {/if}
