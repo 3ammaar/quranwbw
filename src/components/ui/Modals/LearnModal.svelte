@@ -161,9 +161,47 @@
 		</div>
 	</div>
 
-	<div class="flex flex-row">
+	{#if stage == 0 || stage == 1}
+	<div class="flex flex=row mt-6 mb-1">
+		<button on:click={() => {
+			if (stage == 0 && hiddenIndex <= data[verseKeys[2]].meta.words) {
+				hiddenIndex += 1;
+				if (hiddenIndex > data[verseKeys[2]].meta.words) {
+					correctIndex = hiddenIndex;
+				}
+				else {
+					correctIndex = Math.max(hiddenIndex - 1, 0);
+				}
+				cursor1?.setIndex(hiddenIndex);
+			} else if (stage == 1 && correctIndex <= data[verseKeys[2]].meta.words) {
+				correctIndex += 1;
+				if (correctIndex >= hiddenIndex) hiddenIndex = correctIndex + 1;
+				cursor2?.setIndex(correctIndex);
+			}
+			
+		}} class="w-full mr-2 {buttonClasses}">Move Left</button>
+		<button on:click={() => {
+			if (stage == 0 && hiddenIndex > 0) {
+				hiddenIndex -= 1;
+				if (hiddenIndex > data[verseKeys[2]].meta.words) {
+					correctIndex = hiddenIndex;
+				}
+				else {
+					correctIndex = Math.max(hiddenIndex - 1, 0);
+				}
+				cursor1?.setIndex(hiddenIndex);
+			} else if (stage == 1 && correctIndex > 0) {
+				correctIndex -= 1;
+				if (correctIndex >= hiddenIndex) hiddenIndex = correctIndex + 1;
+				cursor2?.setIndex(correctIndex);
+			}
+		}} class="w-full mr-2 {buttonClasses}">Move Right</button>
+	</div>
+	{/if}
+
+	<div class="flex flex-row {stage == 2 && "mt-6"}">
 		{#if stage == 0}
-		<button on:click={() => {stage = 1;}} class="w-full mr-2 mt-6 {buttonClasses}">Next</button>
+		<button on:click={() => {stage = 1;}} class="w-full mr-2 {buttonClasses}">Next</button>
 		{/if}
 		{#if stage == 1}
 		<button
@@ -175,11 +213,11 @@
 					hiddenIndex = null;
 				}
 			}}
-			class="w-full mr-2 mt-6 {buttonClasses}"
+			class="w-full mr-2 {buttonClasses}"
 		>{
 			(correctIndex > data[verseKeys[2]].meta.words) ? "Next - No mistakes"
 			: (correctIndex == data[verseKeys[2]].meta.words) ? "Next - Forgot the end of the verse"
-			: "Next - Forgot or made a mistake at the word highlighted in red"
+			: "Next - Forgot the word highlighted in red"
 		}</button>
 		{/if}
 		{#if stage == 2}
@@ -187,14 +225,14 @@
 			on:click={() => {
 				showNextCard(data[verseKeys[2]].meta.words);
 			}}
-			class="w-full mr-2 mt-6 {buttonClasses}"
+			class="w-full mr-2 {buttonClasses}"
 		>Next</button>
 		<button
 			on:click={() => {
 				rescheduleVerse($__verseKey, correctIndex, data[verseKeys[2]].meta.words);
 				__learnModalVisible.set(false);
 			}}
-			class="w-fit mr-2 mt-6 {buttonClasses}"
+			class="w-fit mr-2 {buttonClasses}"
 		>Finish</button>
 		{/if}
 	</div>
