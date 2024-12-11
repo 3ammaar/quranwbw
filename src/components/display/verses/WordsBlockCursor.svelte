@@ -5,6 +5,8 @@
 	export let onCursorChange = () => {};
 	export let color = "#000000";
 	export let initialIndex = 0;
+	export let getParent = null;
+	export let disabled = false;
 
 	let selectedDraggable = null;
 	let finalWord = false;
@@ -13,7 +15,7 @@
 	function moveSelection(selectionNode, destinationNode) {
 		finalWord = !destinationNode;
 		if (finalWord) {
-			destinationNode = document.getElementById("final-cursor-word");
+			destinationNode = getParent().getElementsByClassName("final-cursor-word")[0];
 		}
 		if (destinationNode != selectionNode && !selectionNode.contains(destinationNode)) {
 			destinationNode.insertBefore(selectionNode, null)
@@ -27,7 +29,7 @@
 	}
 
 	export function setIndex(i) {
-		let node = document.getElementById("base-cursor-word");
+		let node = getParent().getElementsByClassName("base-cursor-word")[0];
 		const words = Array.from(node.parentNode.children)
 			.filter((n) => n.classList.contains("cursor-word"));
 		
@@ -39,6 +41,7 @@
 			selectedDraggable
 			&& e.target.nodeType == Node.ELEMENT_NODE 
 			&& e.target.classList.contains("cursor-word")
+			&& getParent().contains(e.target)
 		) {
 			var next = e.target.nextElementSibling;
 			while (next && !next.classList.contains("cursor-word")) {
@@ -79,7 +82,11 @@
 	on:dragend={dragEnd} 
 	on:dragstart={dragStart} 
 	on:dragover={(e) => {e.preventDefault()}} 
-	style="{finalWord ? "left: 0;" : "right: 0;"} position: absolute; top: 0; padding-right: 10px;"
+	style="	
+		{finalWord ? "left: 0;" : "right: 0;"}
+		{disabled ? "display: none;" : ""}
+		position: absolute; top: 0; padding-right: 10px;
+	"
 	class="no-ghost"
 >
 	<div style="position: absolute; top: 0; left: 0;">

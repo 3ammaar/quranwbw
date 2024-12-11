@@ -15,9 +15,11 @@
 	export let line = null;
 	export let exampleVerse = false;
 	export let hiddenIndex = null;
+	export let correctIndex = null;
 	export let wordOnly = false;
 	export let hasDraggableCursor = false;
-	export let onCursorDragOver = () => {};
+	export let onCursorDragOver = null;
+	export let hideVerseNumber = false;
 
 	const fontSizes = JSON.parse($__userSettings).displaySettings.fontSizes;
 	$: displayIsContinuous = selectableDisplays[$__displayType].continuous;
@@ -117,8 +119,7 @@
 <div
 	style="position: relative; width: 20px;"
 	on:dragover={onCursorDragOver}
-	class="cursor-word"
-	id="base-cursor-word" />
+	class="cursor-word base-cursor-word" />
 {/if}
 
 <!-- words -->
@@ -130,6 +131,8 @@
 			style="
 				{(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden;" : ""}
 				{(hasDraggableCursor ? "margin-left: 10px;" : "")}
+				{(correctIndex !== null && word < correctIndex) ? "border-bottom: thick green; border-bottom-style: solid;" : ""}
+				{(correctIndex !== null && word == correctIndex) ? "border-bottom: thick red; border-bottom-style: solid;" : ""}
 			"
 		>
 			<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
@@ -157,21 +160,34 @@
 {#if $__currentPage != 'mushaf' || ($__currentPage === 'mushaf' && value.words.end_line === line)}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div style="position: relative;" on:dragover={onCursorDragOver} class="cursor-word" id="final-cursor-word">
+	<div style="position: relative;" on:dragover={onCursorDragOver} class="cursor-word final-cursor-word">
 		<div
 			class="{(hasDraggableCursor ? "no-pointer" : "")}"
 			style="
 				{(hiddenIndex !== null && value.meta.words >= hiddenIndex) ? "visibility: hidden;" : ""}
+				{(correctIndex !== null && value.meta.words < correctIndex) ? "border-bottom: thick green; border-bottom-style: solid;" : ""}
+				{(correctIndex !== null && value.meta.words == correctIndex) ? "border-bottom: thick red; border-bottom-style: solid;" : ""}
 			"
 		>
 			<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
 				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+					
 					<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
 					{#if [1, 4].includes($__fontType)}
+						{#if hideVerseNumber}
+						<div>۝</div>
+						{:else}
 						{value.words.end}
+						{/if}
 						<!-- 2: Uthmanic Hafs Mushaf -->
 					{:else if [2, 3].includes($__fontType)}
-						<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">{value.words.end}</span>
+						<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">
+							{#if hideVerseNumber}
+							<div>۝</div>
+							{:else}
+							{value.words.end}
+							{/if}
+						</span>
 					{/if}
 				</span>
 			</div>
