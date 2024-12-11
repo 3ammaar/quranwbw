@@ -14,6 +14,12 @@
 	export let value;
 	export let line = null;
 	export let exampleVerse = false;
+	export let hiddenIndex = null;
+	export let correctIndex = null;
+	export let wordOnly = false;
+	export let hasDraggableCursor = false;
+	export let onCursorDragOver = null;
+	export let hideVerseNumber = false;
 
 	const fontSizes = JSON.parse($__userSettings).displaySettings.fontSizes;
 	$: displayIsContinuous = selectableDisplays[$__displayType].continuous;
@@ -102,32 +108,123 @@
 	`;
 </script>
 
+<style>
+	.no-pointer, .no-pointer * {
+		pointer-events: none;
+	}
+
+	.correct-word {
+		border-bottom: thick green;
+		border-bottom-style: solid;
+	}
+
+	.incorrect-word {
+		border-bottom: thick red;
+		border-bottom-style: solid;
+	}
+</style>
+
+{#if hasDraggableCursor}
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div
+	class="cursor-word base-cursor-word relative w-5"
+	on:dragover={onCursorDragOver}
+/>
+{/if}
+
 <!-- words -->
 {#each { length: value.meta.words } as _, word}
-	<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} />
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div class="relative cursor-word" on:dragover={onCursorDragOver}>
+		<div 
+			class="
+				{hasDraggableCursor && "no-pointer ml-2"}
+				{correctIndex !== null && word < correctIndex && "correct-word"}
+				{correctIndex !== null && word == correctIndex && "incorrect-word"}
+				{hiddenIndex !== null && word >= hiddenIndex && "invisible"}
+			"
+		>
+			<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
+		</div>
+		
+		{#if hiddenIndex !== null}
+		<div 
+			class="
+				{hasDraggableCursor && "no-pointer"}
+				{word != hiddenIndex && "invisible"}
+				absolute right-0 bottom-0 w-full h-full
+			"
+		>
+			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">
+				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+					...
+				</span>
+			</div>
+		</div>
+		{/if}
+	</div>
 {/each}
 
 <!-- end icon -->
 {#if $__currentPage != 'mushaf' || ($__currentPage === 'mushaf' && value.words.end_line === line)}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
-		<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
-			<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
-			{#if [1, 4].includes($__fontType)}
-				{value.words.end}
-				<!-- 2: Uthmanic Hafs Mushaf -->
-			{:else if [2, 3].includes($__fontType)}
-				<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">{value.words.end}</span>
-			{/if}
-		</span>
-	</div>
-	{#if displayIsContinuous}
-		<VerseOptionsDropdown page={value.meta.page} />
-	{/if}
+	<div class="relative cursor-word final-cursor-word" on:dragover={onCursorDragOver}>
+		<div
+			class="
+				{hasDraggableCursor && "no-pointer"}
+				{correctIndex !== null && value.meta.words < correctIndex && "correct-word"}
+				{correctIndex !== null && value.meta.words == correctIndex && "incorrect-word"}
+				{hiddenIndex !== null && value.meta.words >= hiddenIndex && "invisible"}
+			"
+		>
+			<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
+				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+					
+					<!-- 1: Uthmanic Hafs Digital, 3: Indopak Madinah -->
+					{#if [1, 4].includes($__fontType)}
+						{#if hideVerseNumber}
+						<div>۝</div>
+						{:else}
+						{value.words.end}
+						{/if}
+						<!-- 2: Uthmanic Hafs Mushaf -->
+					{:else if [2, 3].includes($__fontType)}
+						<span style="font-family: p{value.meta.page}" class="{v4hafsClasses} custom-ayah-icon-color">
+							{#if hideVerseNumber}
+							<div>۝</div>
+							{:else}
+							{value.words.end}
+							{/if}
+						</span>
+					{/if}
+				</span>
+			</div>
 
-	<!-- end icon tooltip -->
-	<Tooltip arrow={false} type="light" class="z-30 inline-flex font-sans font-normal">
-		End of {key}
-	</Tooltip>
+			{#if displayIsContinuous}
+				<VerseOptionsDropdown page={value.meta.page} />
+			{/if}
+
+			<!-- end icon tooltip -->
+			<Tooltip arrow={false} type="light" class="z-30 inline-flex font-sans font-normal">
+				End of {key}
+			</Tooltip>
+		</div>
+
+		{#if hiddenIndex !== null}
+		<div 
+			class="
+				{hasDraggableCursor && "no-pointer"}
+				{value.meta.words != hiddenIndex && "invisible"}
+				absolute right-0 bottom-0 w-full h-full
+			"
+		>
+			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">
+				<span class={wordSpanClasses} data-fontSize={fontSizes.arabicText}>
+					...
+				</span>
+			</div>
+		</div>
+		{/if}
+	</div>
 {/if}

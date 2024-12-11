@@ -8,6 +8,7 @@
 	export let wordSpanClasses;
 	export let v4hafsClasses;
 	export let exampleVerse = false;
+	export let wordOnly = false;
 
 	import Tooltip from '$ui/FlowbiteSvelte/tooltip/Tooltip.svelte';
 	// import Popover from '$ui/FlowbiteSvelte/popover/Popover.svelte';
@@ -88,7 +89,7 @@
 		</span>
 
 		<!-- word translation and transliteration, only for wbw modes -->
-		{#if [1, 3, 7].includes($__displayType) && !exampleVerse}
+		{#if [1, 3, 7].includes($__displayType) && !exampleVerse && !wordOnly}
 			<div class={wordTranslationClasses} data-fontSize={fontSizes.wordTranslationText}>
 				<span class="leading-normal {$__wordTransliterationEnabled ? 'block' : 'hidden'}">{transliterationSplit[word]}</span>
 				<span class="leading-normal {$__wordTranslation === 2 && 'font-Urdu'} {$__wordTranslationEnabled ? 'block' : 'hidden'}">{translationSplit[word]}</span>

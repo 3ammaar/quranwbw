@@ -8,12 +8,13 @@
 	import Tooltip from '$ui/FlowbiteSvelte/tooltip/Tooltip.svelte';
 	import { updateSettings } from '$utils/updateSettings';
 	import { quranMetaData, mostRead } from '$data/quranMeta';
-	import { __lastRead, __favouriteChapters, __userBookmarks, __userNotes, __timeSpecificChapters, __siteNavigationModalVisible, __quranNavigationModalVisible } from '$utils/stores';
+	import { __lastRead, __favouriteChapters, __userBookmarks, __userNotes, __timeSpecificChapters, __siteNavigationModalVisible, __quranNavigationModalVisible, __learnModalVisible } from '$utils/stores';
 	import { buttonClasses, buttonOutlineClasses } from '$data/commonClasses';
 	import { checkTimeSpecificChapters } from '$utils/checkTimeSpecificChapters';
 	import { term } from '$utils/terminologies';
 	import { fetchVersesData } from '$utils/fetchData';
 	import { splitDelimiter } from '$data/websiteSettings';
+	import { reviewAll, learnFromChapter, getNumberDue, getAllChaptersProgress } from '$utils/learningScheduler';
 
 	// CSS classes for chapter cards and tabs
 	const cardGridClasses = 'grid md:grid-cols-2 lg:grid-cols-3 gap-3';
@@ -41,6 +42,11 @@
 	$: fetchData = activeTab === 3 && totalBookmarks !== 0 ? fetchVersesData({ verses: $__userBookmarks.toString(), fontType: 1 }) : null;
 	$: totalBookmarks = $__userBookmarks.length;
 	$: totalNotes = Object.keys($__userNotes).length;
+
+	// Reactive variables to fetch review and learn data when on the learn tab
+	$: allChaptersProgress = activeTab === 5 && !$__learnModalVisible ? getAllChaptersProgress() : null;
+	$: numberDue = !$__learnModalVisible && getNumberDue();
+	setInterval(() => numberDue = getNumberDue(), 60 * 1000);
 
 	// Remove 'invisible' class from chapter icons once fonts are loaded
 	document.fonts.ready.then(() => {
@@ -91,6 +97,10 @@
 					<button on:click={() => (activeTab = 4)} class="{activeTab === 4 ? tabActiveBorder : tabDefaultBorder} flex flex-row space-x-1 items-center truncate" type="button">
 						<span>Notes</span>
 						<span class="hidden xs:block">{totalNotes > 0 ? `(${totalNotes})` : ''}</span>
+					</button>
+					<button on:click={() => (activeTab = 5)} class="{activeTab === 5 ? tabActiveBorder : tabDefaultBorder} flex flex-row space-x-1 items-center truncate" type="button">
+						<span>Learn</span>
+						<span class="hidden xs:block">{numberDue > 0 ? `(${numberDue})` : ''}</span>
 					</button>
 				</div>
 			</div>
@@ -239,6 +249,74 @@
 							</a>
 						{/each}
 					</div>
+				{/if}
+			</div>
+		</div>
+
+		<!-- learn tab -->
+		<div class="learn-tab-panels space-y-12 {activeTab === 5 ? 'block' : 'hidden'}" id="learn-tab-panel" role="tabpanel" aria-labelledby="learn-tab">
+			<div>
+				<button
+					class="py-1 w-full w-fit mr-2 mt-2 mb-6 {buttonClasses}" 
+					on:click={() => {reviewAll()}}
+					disabled={!numberDue}
+				>
+					<h3 class="text-lg font-medium">Review - {numberDue} due</h3>
+				</button>
+
+				<h3 class="text-xl font-semibold">Learn new verses</h3>
+
+				{#if allChaptersProgress}
+				{#each [...quranMetaData] as { id }, i}
+					{#if id > 0}
+						<button
+							class="py-1 w-full"
+							on:click={() => {learnFromChapter(id)}}
+							disabled={!allChaptersProgress[id].unseen.length}
+						>
+							<div class="{cardInnerClasses} flex-col-reverse md:flex-row text-center items-center">
+								<div class="flex justify-between w-full">
+									<!-- chapter name and icon -->
+									 <div>
+										<!-- chapter name and icon -->
+										<div class="flex flex-row items-center space-x-1 justify-center md:justify-start truncate">
+											<div>{id}. {quranMetaData[id].transliteration}</div>
+											<div><svelte:component this={quranMetaData[id].revelation === 1 ? Mecca : Madinah} /></div>
+											<Tooltip arrow={false} type="light" placement="top" class="z-30 hidden md:block font-normal">{quranMetaData[id].revelation === 1 ? term('meccan') : term('medinan')} revelation</Tooltip>
+										</div>
+
+										<!-- chapter translation -->
+										<div class="block text-xs truncate opacity-70">
+											{quranMetaData[id].translation}
+										</div>
+
+										<!-- chapter verses -->
+										<div class="block text-xs opacity-70">
+											{quranMetaData[id].verses}
+											{term('verses')}
+										</div>
+									</div>
+									<div class="flex flex-row items-right w-32">
+										<div class="text-right pr-2 w-10">
+											{allChaptersProgress[id].unseen.length} <br>
+											{allChaptersProgress[id].learning.length} <br>
+											{allChaptersProgress[id].acquired.length} <br>
+											{allChaptersProgress[id].stable.length} <br>
+											{allChaptersProgress[id].established.length} <br>
+										</div>
+										<div class="text-left">
+											Unseen <br>
+											Learning <br>
+											Acquired <br>
+											Stable <br>
+											Established <br>
+										</div>
+									</div>
+								</div>
+							</div>
+						</button>
+					{/if}
+				{/each}
 				{/if}
 			</div>
 		</div>
