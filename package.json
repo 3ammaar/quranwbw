@@ -9,7 +9,7 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"css": "npx tailwindcss -i ./src/app.css -c ./tailwind.config.js -o ./static/css/global.css --watch",
-		"postinstall": "patch-package"
+		"postinstall": "./node_modules/.bin/patch-package"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",

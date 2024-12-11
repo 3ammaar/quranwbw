@@ -1,3 +1,4 @@
+<script context="module">import DragDropTouch from 'dragdroptouch-bug-fixed'</script>
 <script>
 	import ArrowDown from '$svgs/ArrowDown.svelte';
 	import { onMount } from 'svelte';
