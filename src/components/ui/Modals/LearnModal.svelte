@@ -103,6 +103,7 @@
 				key={verseKeys[0]} 
 				wordOnly={true} 
 				hideVerseNumber={true}
+				disablePointer={true}
 			/>
 		</div>
 		{/if}
@@ -113,6 +114,7 @@
 				key={verseKeys[1]} 
 				wordOnly={true} 
 				hideVerseNumber={true}
+				disablePointer={true}
 			/>
 		</div>
 		{/if}

@@ -20,6 +20,7 @@
 	export let hasDraggableCursor = false;
 	export let onCursorDragOver = null;
 	export let hideVerseNumber = false;
+	export let disablePointer = false;
 
 	const fontSizes = JSON.parse($__userSettings).displaySettings.fontSizes;
 	$: displayIsContinuous = selectableDisplays[$__displayType].continuous;
@@ -138,7 +139,8 @@
 	<div class="relative cursor-word" on:dragover={onCursorDragOver}>
 		<div 
 			class="
-				{hasDraggableCursor && "no-pointer ml-2"}
+				{(hasDraggableCursor || disablePointer) && "no-pointer"}
+				{hasDraggableCursor && "ml-2"}
 				{correctIndex !== null && word < correctIndex && "correct-word"}
 				{correctIndex !== null && word == correctIndex && "incorrect-word"}
 				{hiddenIndex !== null && word >= hiddenIndex && "invisible"}
@@ -150,7 +152,7 @@
 		{#if hiddenIndex !== null}
 		<div 
 			class="
-				{hasDraggableCursor && "no-pointer"}
+				{(hasDraggableCursor || disablePointer) && "no-pointer"}
 				{word != hiddenIndex && "invisible"}
 				absolute right-0 bottom-0 w-full h-full
 			"
@@ -172,7 +174,7 @@
 	<div class="relative cursor-word final-cursor-word" on:dragover={onCursorDragOver}>
 		<div
 			class="
-				{hasDraggableCursor && "no-pointer"}
+				{(hasDraggableCursor || disablePointer) && "no-pointer"}
 				{correctIndex !== null && value.meta.words < correctIndex && "correct-word"}
 				{correctIndex !== null && value.meta.words == correctIndex && "incorrect-word"}
 				{hiddenIndex !== null && value.meta.words >= hiddenIndex && "invisible"}
@@ -214,7 +216,7 @@
 		{#if hiddenIndex !== null}
 		<div 
 			class="
-				{hasDraggableCursor && "no-pointer"}
+				{(hasDraggableCursor || disablePointer) && "no-pointer"}
 				{value.meta.words != hiddenIndex && "invisible"}
 				absolute right-0 bottom-0 w-full h-full
 			"
