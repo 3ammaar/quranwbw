@@ -4,7 +4,7 @@
 	export let line = null;
 	export let startVerse = null;
 
-	import { __currentPage, __chapterNumber, __fontType, __websiteTheme } from '$utils/stores';
+	import { __currentPage, __chapterNumber, __fontType, __websiteTheme, __learnModalVisible } from '$utils/stores';
 
 	const bismillahTypes = {
 		uthmaniType1: 'ﲚﲛﲞﲤ',
@@ -34,7 +34,7 @@
 </script>
 
 <!-- chapter page -->
-{#if $__currentPage === 'chapter'}
+{#if $__currentPage === 'chapter' || $__learnModalVisible}
 	{#if ![1, 9].includes($__chapterNumber) || ($__chapterNumber === 1 && startVerse > 1)}
 		<div class={chapterBismillahClasses}>
 			<!-- uthmani font -->
