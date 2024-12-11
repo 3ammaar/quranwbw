@@ -114,32 +114,45 @@ export function getNextDueFromChapter(chapter) {
     ?.[0] ?? null;
 }
 
+export function getAllChaptersProgress() {
+  let allChaptersProgress = [];
+  for (let i = 1; i <= 114; i++) {
+    allChaptersProgress[i] = getChapterProgress(i);
+  }
+  return allChaptersProgress;
+}
+
 export function getChapterProgress(chapter) {
-  const chapterProgress = {
+  let chapterProgress = {
     "unseen" : [],
     "learning" : [],
-    "young" : [],
-    "other" : []
+    "acquired" : [],
+    "stable" : [],
+    "established" : [],
   };
 
   const dayInMs = 24 * 60 * 60 * 1000;
   const verses = quranMetaData[chapter].verses;
-  for (let verse in verses) {
+  for (let verse = 1; verse <= verses; verse++) {
     const verseKey = chapter + ':' + verse;
-    const dueDate = get(__verseReviewDueDates)[verseKey].dueDate;
+    const dueDate = get(__verseReviewDueDates)[verseKey]?.dueDate;
     if (!dueDate) chapterProgress.unseen.push(+verse);
     else {
       const previousDueDate = get(__verseReviewDueDates)[verseKey].previousDueDate;
-      const interval = previousDueDate ? previousDueDate.getTime() - dueDate.getTime() : null;
-      if (!interval || (interval < 2 * dayInMs)) {
+      const interval = previousDueDate ? new Date(previousDueDate).getTime() - new Date(dueDate).getTime() : null;
+      if (!interval || (interval < 7 * dayInMs)) {
         chapterProgress.learning.push(+verse);
-      } else if (interval < 7 * dayInMs) {
-        chapterProgress.young.push(+verse);
+      } else if (interval < 30 * dayInMs) {
+        chapterProgress.acquired.push(+verse);
+      } else if (interval < 150 & dayInMs) {
+        chapterProgress.stable.push(+verse);
       } else {
-        chapterProgress.other.push(+verse);
+        chapterProgress.established.push(+verse);
       }
     }
   }
+
+  return chapterProgress;
 }
 
 export function getNextToLearn(chapter) {
@@ -150,4 +163,12 @@ export function getNextToLearn(chapter) {
     if (!dueDate) return verseKey;
   }
   return null;
+}
+
+export function getNumberDue() {
+  const now = new Date();
+  
+  return Object.entries(get(__verseReviewDueDates))
+    .filter(([_, value]) => value?.dueDate && new Date(value.dueDate) <= now)
+    .length;
 }

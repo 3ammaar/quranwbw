@@ -64,7 +64,7 @@
 	}
 </script>
 
-<Modal id="learnModal" bind:open={$__learnModalVisible} transitionParams={getModalTransition('bottom')} size="xl" class="!rounded-b-none md:!rounded-3xl" bodyClass="p-6" position="bottom" center>
+<Modal id="learnModal" bind:open={$__learnModalVisible} transitionParams={getModalTransition('bottom')} size="xl" class="!rounded-b-none md:!rounded-3xl" bodyClass="p-6" position="bottom" dismissable={stage == 0} center>
 	<!-- Modal content -->
 	<h3 id="learn-modal-title" class="mb-8 text-xl font-medium">{headerText}</h3>
 
@@ -184,6 +184,7 @@
 		>Next</button>
 		<button
 			on:click={() => {
+				rescheduleVerse($__verseKey, correctIndex, data[verseKeys[2]].meta.words);
 				__learnModalVisible.set(false);
 			}}
 			class="w-fit mr-2 mt-6 {buttonClasses}"
