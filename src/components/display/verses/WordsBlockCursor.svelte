@@ -81,15 +81,10 @@
 	draggable="true"
 	on:dragend={dragEnd} 
 	on:dragstart={dragStart} 
-	on:dragover={(e) => {e.preventDefault()}} 
-	style="	
-		{finalWord ? "left: 0;" : "right: 0;"}
-		{disabled ? "display: none;" : ""}
-		position: absolute; top: 0; padding-right: 10px;
-	"
-	class="no-ghost"
+	on:dragover={(e) => {e.preventDefault()}}
+	class="no-ghost absolute top-0 pr-2 {disabled && "hidden"} {finalWord ? "left-0" : "right-0"}"
 >
-	<div style="position: absolute; top: 0; left: 0;">
+	<div class="absolute top-0 left-0">
 		<ArrowDown height="20px" width="20px" fill={color}/>
 	</div>
 </div>

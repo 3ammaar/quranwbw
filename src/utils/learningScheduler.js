@@ -97,6 +97,7 @@ export function getDueDate(verseKey) {
   return get(__verseReviewDueDates)[verseKey]?.dueDate;
 }
 
+// Returns the verse with the soonest due date out of all verses that are due
 export function getNextDue() {
   const now = new Date();
   
@@ -106,11 +107,12 @@ export function getNextDue() {
     ?.[0] ?? null;
 }
 
+// Returns the first (position-wise) verse in the chapter that is due
 export function getNextDueFromChapter(chapter) {
   const now = new Date();
   return Object.entries(get(__verseReviewDueDates))
     .filter(([key, value]) => key.split(':')[0] == chapter && value?.dueDate && new Date(value.dueDate) <= now)
-    .reduce((prev, curr) => (prev && (prev[1].dueDate <= curr[1].dueDate)) ? prev : curr, null)
+    .reduce((prev, curr) => (prev && (prev[0] <= curr[0])) ? prev : curr, null)
     ?.[0] ?? null;
 }
 

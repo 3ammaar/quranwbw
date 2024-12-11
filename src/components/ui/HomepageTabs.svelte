@@ -44,8 +44,9 @@
 	$: totalNotes = Object.keys($__userNotes).length;
 
 	// Reactive variables to fetch review and learn data when on the learn tab
-	$: numberDue = activeTab === 5 && !$__learnModalVisible ? getNumberDue() : null;
 	$: allChaptersProgress = activeTab === 5 && !$__learnModalVisible ? getAllChaptersProgress() : null;
+	$: numberDue = !$__learnModalVisible && getNumberDue();
+	setInterval(() => numberDue = getNumberDue(), 60 * 1000);
 
 	// Remove 'invisible' class from chapter icons once fonts are loaded
 	document.fonts.ready.then(() => {
@@ -97,7 +98,10 @@
 						<span>Notes</span>
 						<span class="hidden xs:block">{totalNotes > 0 ? `(${totalNotes})` : ''}</span>
 					</button>
-					<button on:click={() => (activeTab = 5)} class={activeTab === 5 ? tabActiveBorder : tabDefaultBorder} type="button">Learn</button>
+					<button on:click={() => (activeTab = 5)} class="{activeTab === 5 ? tabActiveBorder : tabDefaultBorder} flex flex-row space-x-1 items-center truncate" type="button">
+						<span>Learn</span>
+						<span class="hidden xs:block">{numberDue > 0 ? `(${numberDue})` : ''}</span>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -273,23 +277,39 @@
 							<div class="{cardInnerClasses} flex-col-reverse md:flex-row text-center items-center">
 								<div class="flex justify-between w-full">
 									<!-- chapter name and icon -->
-									<div class="flex flex-row items-center space-x-1 justify-center md:justify-start truncate">
-										<div>{id}. {quranMetaData[id].transliteration}</div>
-										<div><svelte:component this={quranMetaData[id].revelation === 1 ? Mecca : Madinah} /></div>
-										<Tooltip arrow={false} type="light" placement="top" class="z-30 hidden md:block font-normal">{quranMetaData[id].revelation === 1 ? term('meccan') : term('medinan')} revelation</Tooltip>
-									</div>
-									<div class="flex flex-column items-center">
-										<div class="{buttonClasses}">
-											<h3 class="text-lg font-medium">Learn</h3>
+									 <div>
+										<!-- chapter name and icon -->
+										<div class="flex flex-row items-center space-x-1 justify-center md:justify-start truncate">
+											<div>{id}. {quranMetaData[id].transliteration}</div>
+											<div><svelte:component this={quranMetaData[id].revelation === 1 ? Mecca : Madinah} /></div>
+											<Tooltip arrow={false} type="light" placement="top" class="z-30 hidden md:block font-normal">{quranMetaData[id].revelation === 1 ? term('meccan') : term('medinan')} revelation</Tooltip>
+										</div>
+
+										<!-- chapter translation -->
+										<div class="block text-xs truncate opacity-70">
+											{quranMetaData[id].translation}
+										</div>
+
+										<!-- chapter verses -->
+										<div class="block text-xs opacity-70">
+											{quranMetaData[id].verses}
+											{term('verses')}
 										</div>
 									</div>
-									<div class="flex">
-										<div>
-											{allChaptersProgress[id].unseen.length} Unseen <br>
-											{allChaptersProgress[id].learning.length} Learning <br>
-											{allChaptersProgress[id].acquired.length} Acquired <br>
-											{allChaptersProgress[id].stable.length} Stable <br>
-											{allChaptersProgress[id].established.length} Established <br>
+									<div class="flex flex-row items-right w-32">
+										<div class="text-right pr-2 w-10">
+											{allChaptersProgress[id].unseen.length} <br>
+											{allChaptersProgress[id].learning.length} <br>
+											{allChaptersProgress[id].acquired.length} <br>
+											{allChaptersProgress[id].stable.length} <br>
+											{allChaptersProgress[id].established.length} <br>
+										</div>
+										<div class="text-left">
+											Unseen <br>
+											Learning <br>
+											Acquired <br>
+											Stable <br>
+											Established <br>
 										</div>
 									</div>
 								</div>

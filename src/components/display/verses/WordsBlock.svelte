@@ -112,27 +112,36 @@
 	.no-pointer, .no-pointer * {
 		pointer-events: none;
 	}
+
+	.correct-word {
+		border-bottom: thick green;
+		border-bottom-style: solid;
+	}
+
+	.incorrect-word {
+		border-bottom: thick red;
+		border-bottom-style: solid;
+	}
 </style>
 
 {#if hasDraggableCursor}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-	style="position: relative; width: 20px;"
+	class="cursor-word base-cursor-word relative w-5"
 	on:dragover={onCursorDragOver}
-	class="cursor-word base-cursor-word" />
+/>
 {/if}
 
 <!-- words -->
 {#each { length: value.meta.words } as _, word}
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div style="position: relative;" on:dragover={onCursorDragOver} class="cursor-word">
+	<div class="relative cursor-word" on:dragover={onCursorDragOver}>
 		<div 
-			class="{(hasDraggableCursor ? "no-pointer" : "")}"
-			style="
-				{(hiddenIndex !== null && word >= hiddenIndex) ? "visibility: hidden;" : ""}
-				{(hasDraggableCursor ? "margin-left: 10px;" : "")}
-				{(correctIndex !== null && word < correctIndex) ? "border-bottom: thick green; border-bottom-style: solid;" : ""}
-				{(correctIndex !== null && word == correctIndex) ? "border-bottom: thick red; border-bottom-style: solid;" : ""}
+			class="
+				{hasDraggableCursor && "no-pointer ml-2"}
+				{correctIndex !== null && word < correctIndex && "correct-word"}
+				{correctIndex !== null && word == correctIndex && "incorrect-word"}
+				{hiddenIndex !== null && word >= hiddenIndex && "invisible"}
 			"
 		>
 			<Word {value} {word} {key} {line} {wordClickHandler} {wordAndEndIconCommonClasses} {wordSpanClasses} {v4hafsClasses} {exampleVerse} {wordOnly}/>
@@ -140,10 +149,10 @@
 		
 		{#if hiddenIndex !== null}
 		<div 
-			class="{(hasDraggableCursor ? "no-pointer" : "")}"
-			style="
-				{(word != hiddenIndex) ? "visibility: hidden;" : ""}
-				position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
+			class="
+				{hasDraggableCursor && "no-pointer"}
+				{word != hiddenIndex && "invisible"}
+				absolute right-0 bottom-0 w-full h-full
 			"
 		>
 			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">
@@ -160,13 +169,13 @@
 {#if $__currentPage != 'mushaf' || ($__currentPage === 'mushaf' && value.words.end_line === line)}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div style="position: relative;" on:dragover={onCursorDragOver} class="cursor-word final-cursor-word">
+	<div class="relative cursor-word final-cursor-word" on:dragover={onCursorDragOver}>
 		<div
-			class="{(hasDraggableCursor ? "no-pointer" : "")}"
-			style="
-				{(hiddenIndex !== null && value.meta.words >= hiddenIndex) ? "visibility: hidden;" : ""}
-				{(correctIndex !== null && value.meta.words < correctIndex) ? "border-bottom: thick green; border-bottom-style: solid;" : ""}
-				{(correctIndex !== null && value.meta.words == correctIndex) ? "border-bottom: thick red; border-bottom-style: solid;" : ""}
+			class="
+				{hasDraggableCursor && "no-pointer"}
+				{correctIndex !== null && value.meta.words < correctIndex && "correct-word"}
+				{correctIndex !== null && value.meta.words == correctIndex && "incorrect-word"}
+				{hiddenIndex !== null && value.meta.words >= hiddenIndex && "invisible"}
 			"
 		>
 			<div class={endIconClasses} on:click={() => wordClickHandler({ key, type: 'end' })}>
@@ -204,10 +213,10 @@
 
 		{#if hiddenIndex !== null}
 		<div 
-			class="{(hasDraggableCursor ? "no-pointer" : "")}"
-			style="
-				{(value.meta.words != hiddenIndex) ? "visibility: hidden;" : ""}
-				position: absolute; right: 0; bottom: 0; width: 100%; height: 100%;
+			class="
+				{hasDraggableCursor && "no-pointer"}
+				{value.meta.words != hiddenIndex && "invisible"}
+				absolute right-0 bottom-0 w-full h-full
 			"
 		>
 			<div class="${wordAndEndIconCommonClasses} text-right print:break-inside-avoid">

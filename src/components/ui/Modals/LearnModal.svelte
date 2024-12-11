@@ -31,10 +31,15 @@
 		chapterNumber = $__verseKey.split(':')[0];
 		verseNumber = $__verseKey.split(':')[1];
 
+		// The verse before the verse
 		verseKeys[2] = chapterNumber + ":" + verseNumber;
+
+		// The verse before the verse being reviewed, for context
 		verseKeys[1] = (verseNumber - 1 > 0)
 						? chapterNumber + ":" + (verseNumber-1)
 						: null;
+
+		// The verse twice before the verse being reviewed, for context
 		verseKeys[0] = (verseNumber - 2 > 0)
 						? chapterNumber + ":" + (verseNumber-2)
 						: null;
@@ -46,7 +51,7 @@
 		$__learnModalVisible;
 	}
 
-	function getNextCard(totalWords) {
+	function showNextCard(totalWords) {
 		rescheduleVerse($__verseKey, correctIndex, totalWords);
 		const nextVerseKey = getNextDueFromChapter(chapterNumber);
 		if (nextVerseKey != null) {
@@ -114,19 +119,19 @@
 		<div class="flex flex-wrap direction-rtl" bind:this={cursorDiv}>
 			{#if stage == 0}
 			<WordsBlockCursor 
-			onCursorChange={i => {
-				hiddenIndex = i;
-				if (stage == 0) {
-					if (hiddenIndex > data[verseKeys[2]].meta.words) {
-						correctIndex = hiddenIndex;
+				onCursorChange={i => {
+					hiddenIndex = i;
+					if (stage == 0) {
+						if (hiddenIndex > data[verseKeys[2]].meta.words) {
+							correctIndex = hiddenIndex;
+						}
+						else {
+							correctIndex = Math.max(hiddenIndex - 1, 0);
+						}
 					}
-					else {
-						correctIndex = Math.max(hiddenIndex - 1, 0);
-					}
-				}
-			}}
-			color={"#00FF00"}
-			getParent={() => {return cursorDiv}}
+				}}
+				color={"#2563eb"}
+				getParent={() => {return cursorDiv}}
 				bind:this={cursor1}
 			/>
 			{/if}
@@ -137,7 +142,7 @@
 					correctIndex = i;
 					if (correctIndex >= hiddenIndex) hiddenIndex = correctIndex + 1;
 				}}
-				color={"#FF0000"}
+				color={"#2563eb"}
 				getParent={() => {return cursorDiv}}
 				bind:this={cursor2}
 			/>
@@ -162,7 +167,7 @@
 		<button
 			on:click={() => {
 				if (correctIndex > data[verseKeys[2]].meta.words) {
-					getNextCard(data[verseKeys[2]].meta.words);
+					showNextCard(data[verseKeys[2]].meta.words);
 				} else {
 					stage = 2;
 					hiddenIndex = null;
@@ -172,13 +177,13 @@
 		>{
 			(correctIndex > data[verseKeys[2]].meta.words) ? "Next - No mistakes"
 			: (correctIndex == data[verseKeys[2]].meta.words) ? "Next - Forgot the end of the verse"
-			: "Next - Forgot / mistake at word highlighted in red"
+			: "Next - Forgot or made a mistake at the word highlighted in red"
 		}</button>
 		{/if}
 		{#if stage == 2}
 		<button
 			on:click={() => {
-				getNextCard(data[verseKeys[2]].meta.words);
+				showNextCard(data[verseKeys[2]].meta.words);
 			}}
 			class="w-full mr-2 mt-6 {buttonClasses}"
 		>Next</button>
