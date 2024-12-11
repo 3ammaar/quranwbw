@@ -55,6 +55,7 @@ let __websiteOnline,
 	__changelogModalVisible,
 	__verseTranslationModalVisible,
 	__morphologyModalVisible,
+	__learnModalVisible,
 	__wakeLockEnabled,
 	__quizCorrectAnswers,
 	__quizWrongAnswers,
@@ -63,7 +64,10 @@ let __websiteOnline,
 	__hideNonDuaPart,
 	__wordRoot,
 	__playButtonsFunctionality,
-	__mushafMinimalModeEnabled;
+	__mushafMinimalModeEnabled,
+	__verseReviewDueDates,
+	__learnMode,
+	__wordInVerseReviewCards;
 
 if (browser) {
 	const userSettings = JSON.parse(localStorage.getItem('userSettings'));
@@ -216,6 +220,7 @@ if (browser) {
 	__changelogModalVisible = writable(false);
 	__verseTranslationModalVisible = writable(false);
 	__morphologyModalVisible = writable(false);
+	__learnModalVisible = writable(false);
 
 	// wake lock settings
 	__wakeLockEnabled = writable(userSettings.displaySettings.wakeLockEnabled);
@@ -247,6 +252,15 @@ if (browser) {
 
 	// used to hide elements on pinch
 	__mushafMinimalModeEnabled = writable(false);
+
+	// review due dates of each verse
+	__verseReviewDueDates = writable(userSettings.verseReviewDueDates);
+
+	// used to indicate whether to just review past cards or to also learn new cards, or neither
+	__learnMode = writable(null);
+
+	// FSRS cards for each verse, one per word
+	__wordInVerseReviewCards = writable(userSettings.wordInVerseReviewCards);
 }
 
 export {
@@ -304,6 +318,7 @@ export {
 	__changelogModalVisible,
 	__verseTranslationModalVisible,
 	__morphologyModalVisible,
+	__learnModalVisible,
 	__wakeLockEnabled,
 	__quizCorrectAnswers,
 	__quizWrongAnswers,
@@ -312,5 +327,8 @@ export {
 	__hideNonDuaPart,
 	__wordRoot,
 	__playButtonsFunctionality,
-	__mushafMinimalModeEnabled
+	__mushafMinimalModeEnabled,
+	__verseReviewDueDates,
+	__learnMode,
+	__wordInVerseReviewCards
 };

@@ -90,6 +90,12 @@ export function setUserSettings() {
 
 	userSettings.oneTimeModals.changelogModal = userSettings.oneTimeModals.changelogModal !== undefined ? userSettings.oneTimeModals.changelogModal : false;
 
+	// Review due dates of each verse
+	userSettings.verseReviewDueDates = userSettings.verseReviewDueDates || {};
+
+	// FSRS cards for each verse, one per word
+	userSettings.wordInVerseReviewCards = userSettings.wordInVerseReviewCards || {};
+
 	// Save updated userSettings to localStorage
 	localStorage.setItem('userSettings', JSON.stringify(userSettings));
 }
