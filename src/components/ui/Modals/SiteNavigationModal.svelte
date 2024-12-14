@@ -10,6 +10,7 @@
 	import About from '$svgs/About.svelte';
 	import Changelogs from '$svgs/Changelogs.svelte';
 	import LegacySite from '$svgs/LegacySite.svelte';
+	import User from '$svgs/User.svelte';
 	import { __siteNavigationModalVisible, __settingsDrawerHidden, __tajweedRulesModalVisible, __tokenModalVisible, __currentPage } from '$utils/stores';
 	import { term } from '$utils/terminologies';
 	import { getModalTransition } from '$utils/getModalTransition';
@@ -97,6 +98,12 @@
 				<a href="/about" class={linkClasses}>
 					<About size={4} />
 					<span class={linkTextClasses}>About</span>
+				</a>
+
+				<!-- Account -->
+				<a href="/account" class={linkClasses}>
+					<User size={4} />
+					<span class={linkTextClasses}>Account</span>
 				</a>
 			</div>
 		</div>
