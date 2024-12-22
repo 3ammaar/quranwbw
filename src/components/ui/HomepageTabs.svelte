@@ -44,9 +44,21 @@
 	$: totalNotes = Object.keys($__userNotes).length;
 
 	// Reactive variables to fetch review and learn data when on the learn tab
-	$: allChaptersProgress = activeTab === 5 && !$__learnModalVisible ? getAllChaptersProgress() : null;
-	$: numberDue = !$__learnModalVisible && getNumberDue();
-	setInterval(() => numberDue = getNumberDue(), 60 * 1000);
+	let allChaptersProgress;
+	let numberDue;
+	$: {
+		if (activeTab === 5 && !$__learnModalVisible) {
+			getAllChaptersProgress()
+				.then(progress => allChaptersProgress = progress);
+		}
+	}
+	$: {
+		if (!$__learnModalVisible) {
+			getNumberDue()
+				.then(due => numberDue = due);
+		}
+	}
+	setInterval(() => getNumberDue().then(due => numberDue = due), 60 * 1000);
 
 	// Remove 'invisible' class from chapter icons once fonts are loaded
 	document.fonts.ready.then(() => {
@@ -258,7 +270,10 @@
 			<div>
 				<button
 					class="py-1 w-full w-fit mr-2 mt-2 mb-6 {buttonClasses}" 
-					on:click={() => {reviewAll()}}
+					on:click={() => {
+						//TODO loading
+						reviewAll()
+					}}
 					disabled={!numberDue}
 				>
 					<h3 class="text-lg font-medium">Review - {numberDue} due</h3>
@@ -271,7 +286,10 @@
 					{#if id > 0}
 						<button
 							class="py-1 w-full"
-							on:click={() => {learnFromChapter(id)}}
+							on:click={() => {
+								//TODO loading
+								learnFromChapter(id)
+							}}
 							disabled={!allChaptersProgress[id].unseen.length}
 						>
 							<div class="{cardInnerClasses} flex-col-reverse md:flex-row text-center items-center">

@@ -65,9 +65,7 @@ let __websiteOnline,
 	__wordRoot,
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
-	__verseReviewDueDates,
-	__learnMode,
-	__wordInVerseReviewCards;
+	__learnMode;
 
 if (browser) {
 	const userSettings = JSON.parse(localStorage.getItem('userSettings'));
@@ -253,14 +251,8 @@ if (browser) {
 	// used to hide elements on pinch
 	__mushafMinimalModeEnabled = writable(false);
 
-	// review due dates of each verse
-	__verseReviewDueDates = writable(userSettings.verseReviewDueDates);
-
 	// used to indicate whether to just review past cards or to also learn new cards, or neither
 	__learnMode = writable(null);
-
-	// FSRS cards for each verse, one per word
-	__wordInVerseReviewCards = writable(userSettings.wordInVerseReviewCards);
 }
 
 export {
@@ -328,7 +320,5 @@ export {
 	__wordRoot,
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
-	__verseReviewDueDates,
 	__learnMode,
-	__wordInVerseReviewCards
 };

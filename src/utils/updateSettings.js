@@ -27,8 +27,6 @@ import {
 	__englishTerminology,
 	__hideNonDuaPart,
 	__playButtonsFunctionality,
-	__verseReviewDueDates,
-	__wordInVerseReviewCards
 } from '$utils/stores';
 // import { uploadSettingsToCloud } from '$utils/cloudSettings';
 
@@ -293,31 +291,7 @@ export function updateSettings(props) {
 				}
 			});
 			break;
-		
-			// for review due dates of each verse
-			case 'verseReviewDueDates':
-				const reviewVerseKey = props.key;
-				const verseReviewDueDates = userSettings['verseReviewDueDates'];
-
-				verseReviewDueDates[reviewVerseKey] = {
-					dueDate: props.dueDate, 
-					previousDueDate: verseReviewDueDates[reviewVerseKey]?.dueDate
-				};
-
-				userSettings.verseReviewDueDates = verseReviewDueDates;
-				__verseReviewDueDates.set(verseReviewDueDates);
-				break;
 			
-			// for storing FSRS cards of each verse, one per word
-			case 'wordInVerseReviewCards':
-				const cardVerseKey = props.verseKey;
-				const allWordVerseCards = userSettings['wordInVerseReviewCards'];
-
-				allWordVerseCards[cardVerseKey] = props.cards;
-
-				userSettings.wordInVerseReviewCards = allWordVerseCards;
-				__wordInVerseReviewCards.set(allWordVerseCards);
-				break;
 	}
 
 	// update the settings back into localStorage and global store
