@@ -10,7 +10,7 @@
 	import { __fontType, __verseKey, __learnModalVisible, __learnMode } from '$utils/stores';
 	import { getModalTransition } from '$utils/getModalTransition';
 	import { fetchVersesData } from '$utils/fetchData';
-	import { getNextDueVerseKeyFromChapter, rescheduleVerse, reviewAll, learnFromChapter } from '$utils/learningScheduler';
+	import { getNextDueFromChapter, rescheduleVerse, reviewAll, learnFromChapter } from '$utils/learningScheduler';
 
 	let headerText = "Recite and review";
 
@@ -56,7 +56,7 @@
 
 	async function showNextCard(totalWords) {
 		await rescheduleVerse(chapterNumber, verseNumber, correctIndex, totalWords);
-		const nextVerseKey = await getNextDueVerseKeyFromChapter(chapterNumber);
+		const nextVerseKey = await getNextDueFromChapter(chapterNumber);
 		if (nextVerseKey != null) {
 			__verseKey.set(nextVerseKey);
 			return true;
@@ -191,7 +191,7 @@
 			}} 
 			class="w-full mr-2 {buttonClasses}"
 			disabled={buttonsDisabled}
-		>Move Left</button>
+		>Move Left {buttonsDisabled}</button>
 		<button 
 			on:click={() => {
 				if (stage == 0 && hiddenIndex > 0) {

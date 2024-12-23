@@ -14,7 +14,8 @@
 	import { term } from '$utils/terminologies';
 	import { fetchVersesData } from '$utils/fetchData';
 	import { splitDelimiter } from '$data/websiteSettings';
-	import { reviewAll, learnFromChapter, getNumberDue, getAllChaptersProgress } from '$utils/learningScheduler';
+	import { reviewAll, learnFromChapter, getDueDatesByVerse, getProgressByChapter } from '$utils/learningScheduler';
+	import { liveQuery } from 'dexie';
 
 	// CSS classes for chapter cards and tabs
 	const cardGridClasses = 'grid md:grid-cols-2 lg:grid-cols-3 gap-3';
@@ -43,22 +44,24 @@
 	$: totalBookmarks = $__userBookmarks.length;
 	$: totalNotes = Object.keys($__userNotes).length;
 
-	// Reactive variables to fetch review and learn data when on the learn tab
-	let allChaptersProgress;
+	// Reactive variables to fetch review and learn data when relevant data changes
 	let numberDue;
-	$: {
-		if (activeTab === 5 && !$__learnModalVisible) {
-			getAllChaptersProgress()
-				.then(progress => allChaptersProgress = progress);
+	$: dueDatesByVerse = liveQuery(async () => {
+		return await getDueDatesByVerse();
+	});
+	function setNumberDue(dueDatesByVerse) {
+		if (dueDatesByVerse) {
+			numberDue = dueDatesByVerse.filter(dueDate => dueDate[2] < new Date()).length;
 		}
 	}
-	$: {
-		if (!$__learnModalVisible) {
-			getNumberDue()
-				.then(due => numberDue = due);
-		}
-	}
-	setInterval(() => getNumberDue().then(due => numberDue = due), 60 * 1000);
+	$: setNumberDue($dueDatesByVerse);
+	setInterval(() => {
+		setNumberDue($dueDatesByVerse);
+	}, 60 * 1000);
+
+	$: progressByChapter = liveQuery(async() => {
+		return await getProgressByChapter();
+	})
 
 	// Remove 'invisible' class from chapter icons once fonts are loaded
 	document.fonts.ready.then(() => {
@@ -275,13 +278,13 @@
 						reviewAll()
 					}}
 					disabled={!numberDue}
-				>
-					<h3 class="text-lg font-medium">Review - {numberDue} due</h3>
+				>	
+					<h3 class="text-lg font-medium">Review - {numberDue ?? 0} due</h3>
 				</button>
 
 				<h3 class="text-xl font-semibold">Learn new verses</h3>
 
-				{#if allChaptersProgress}
+				{#if $progressByChapter}
 				{#each [...quranMetaData] as { id }, i}
 					{#if id > 0}
 						<button
@@ -290,7 +293,7 @@
 								//TODO loading
 								learnFromChapter(id)
 							}}
-							disabled={!allChaptersProgress[id].unseen.length}
+							disabled={!$progressByChapter[id]?.unseen.length}
 						>
 							<div class="{cardInnerClasses} flex-col-reverse md:flex-row text-center items-center">
 								<div class="flex justify-between w-full">
@@ -314,13 +317,14 @@
 											{term('verses')}
 										</div>
 									</div>
+
 									<div class="flex flex-row items-right w-32">
 										<div class="text-right pr-2 w-10">
-											{allChaptersProgress[id].unseen.length} <br>
-											{allChaptersProgress[id].learning.length} <br>
-											{allChaptersProgress[id].acquired.length} <br>
-											{allChaptersProgress[id].stable.length} <br>
-											{allChaptersProgress[id].established.length} <br>
+											{$progressByChapter[id]?.unseen.length ?? 0} <br>
+											{$progressByChapter[id]?.learning.length ?? 0} <br>
+											{$progressByChapter[id]?.acquired.length ?? 0} <br>
+											{$progressByChapter[id]?.stable.length ?? 0} <br>
+											{$progressByChapter[id]?.established.length ?? 0} <br>
 										</div>
 										<div class="text-left">
 											Unseen <br>
