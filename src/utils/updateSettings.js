@@ -181,7 +181,7 @@ export function updateSettings(props) {
 			const key = props.key;
 			let userBookmarks = userSettings['userBookmarks'];
 
-			// if override key was set, then just set the value key in localStorage
+			// if override key was set, then just set the value key in storage
 			if (props.override) {
 				userBookmarks = key;
 				const now = new Date();
@@ -223,7 +223,8 @@ export function updateSettings(props) {
 			const notes_key = props.key;
 			const isWhitespaceString = (str) => !str.replace(/\s/g, '').length;
 			let userNotes = userSettings['userNotes'];
-			// if override key was set, then just set the value key in localStorage
+
+			// if override key was set, then just set the value key in storage
 			if (props.override) {
 				userNotes = notes_key;
 				db.userBookmarks.clear().then(() => {
@@ -346,7 +347,7 @@ export function updateSettings(props) {
 			
 	}
 
-	// update the settings back into localStorage and global store
+	// update the settings back into global stores
 	__userSettings.set(JSON.stringify(userSettings));	
 
 	// upload settings to cloud if uploadSettings was set to true, which we only do for bookmarks and notes at the moment
