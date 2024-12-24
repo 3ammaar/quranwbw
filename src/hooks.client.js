@@ -14,7 +14,7 @@ async function moveUserSettingsFromLocalStorageToDB() {
 	// Display settings
 	if (userSettings.displaySettings) {
 		if (userSettings.displaySettings.websiteTheme != null) await db.userSettings.put(
-			{name: "displaySettings.displayType", value: userSettings.displaySettings.websiteTheme, last_updated: now}
+			{name: "displaySettings.websiteTheme", value: userSettings.displaySettings.websiteTheme, last_updated: now}
 		);
 
 		if (userSettings.displaySettings.displayType != null) await db.userSettings.put(
@@ -174,6 +174,12 @@ export async function getUserSettingsOrDefaultFromDB() {
 	let userSettings = {};
 	let arabicTextSize = 'text-2xl';
 
+	let dbUserSettings = {};
+	await db.userSettings.each(row => {
+		if (row.value2 == null) dbUserSettings[row.name] = row.value
+		else dbUserSettings[row.name] = {value: row.value, value2: row.value2}
+	});
+
 	// For larger screens, make 'text-4xl' the default for Arabic word, else keep 'text-2xl' as default.
 	if (window.matchMedia('(min-width: 1280px)').matches || window.matchMedia('(min-width: 1024px)').matches || window.matchMedia('(min-width: 768px)').matches) {
 		arabicTextSize = 'text-4xl';
@@ -182,66 +188,63 @@ export async function getUserSettingsOrDefaultFromDB() {
 	// Display settings
 	if (!userSettings.displaySettings) userSettings.displaySettings = {}; // Parent
 
-	userSettings.displaySettings.websiteTheme = (await db.userSettings.get("displaySettings.websiteTheme"))?.value ?? 1; // Gold
-	userSettings.displaySettings.displayType = (await db.userSettings.get("displaySettings.displayType"))?.value ?? 1; // WBW
-	userSettings.displaySettings.fontType = (await db.userSettings.get("displaySettings.fontType"))?.value ?? 1; // Uthmanic Hafs Digital
-	userSettings.displaySettings.wordTranslationEnabled = !!((await db.userSettings.get("displaySettings.fontType"))?.value ?? true); // Shown
-	userSettings.displaySettings.wordTransliterationEnabled = !!((await db.userSettings.get("displaySettings.wordTransliterationEnabled"))?.value ?? true); // Shown
-	userSettings.displaySettings.wordTooltip = (await db.userSettings.get("displaySettings.wordTooltip"))?.value ?? 1; // None
-	userSettings.displaySettings.autoScrollSpeed = (await db.userSettings.get("displaySettings.autoScrollSpeed"))?.value ?? 40; // x1
-	userSettings.displaySettings.wakeLockEnabled = !!((await db.userSettings.get("displaySettings.wakeLockEnabled"))?.value ?? false); // Enable sleep (default behaviour)
-	userSettings.displaySettings.englishTerminology = !!((await db.userSettings.get("displaySettings.englishTerminology"))?.value ?? false); // Quran terminologies language (default is Arabic)
-	userSettings.displaySettings.hideNonDuaPart = !!((await db.userSettings.get("displaySettings.hideNonDuaPart"))?.value ?? false); // Show all words
+	userSettings.displaySettings.websiteTheme = dbUserSettings["displaySettings.websiteTheme"] ?? 1; // Gold
+	userSettings.displaySettings.displayType = dbUserSettings["displaySettings.displayType"] ?? 1; // WBW
+	userSettings.displaySettings.fontType = dbUserSettings["displaySettings.fontType"] ?? 1; // Uthmanic Hafs Digital
+	userSettings.displaySettings.wordTranslationEnabled = !!(dbUserSettings["displaySettings.fontType"] ?? true); // Shown
+	userSettings.displaySettings.wordTransliterationEnabled = !!(dbUserSettings["displaySettings.wordTransliterationEnabled"] ?? true); // Shown
+	userSettings.displaySettings.wordTooltip = dbUserSettings["displaySettings.wordTooltip"] ?? 1; // None
+	userSettings.displaySettings.autoScrollSpeed = dbUserSettings["displaySettings.autoScrollSpeed"] ?? 40; // x1
+	userSettings.displaySettings.wakeLockEnabled = !!(dbUserSettings["displaySettings.wakeLockEnabled"] ?? false); // Enable sleep (default behaviour)
+	userSettings.displaySettings.englishTerminology = !!(dbUserSettings["displaySettings.englishTerminology"] ?? false); // Quran terminologies language (default is Arabic)
+	userSettings.displaySettings.hideNonDuaPart = !!(dbUserSettings["displaySettings.hideNonDuaPart"] ?? false); // Show all words
 
 	// Font size settings (child of display settings)
 	if (!userSettings.displaySettings.fontSizes) userSettings.displaySettings.fontSizes = {}; // Parent
 
-	userSettings.displaySettings.fontSizes.arabicText = (await db.userSettings.get("displaySettings.fontSizes.arabicText"))?.value ?? arabicTextSize;
-	userSettings.displaySettings.fontSizes.wordTranslationText = (await db.userSettings.get("displaySettings.fontSizes.wordTranslationText"))?.value ?? 'text-sm';
-	userSettings.displaySettings.fontSizes.verseTranslationText = (await db.userSettings.get("displaySettings.fontSizes.verseTranslationText"))?.value ?? 'text-sm';
+	userSettings.displaySettings.fontSizes.arabicText = dbUserSettings["displaySettings.fontSizes.arabicText"] ?? arabicTextSize;
+	userSettings.displaySettings.fontSizes.wordTranslationText =dbUserSettings["displaySettings.fontSizes.wordTranslationText"] ?? 'text-sm';
+	userSettings.displaySettings.fontSizes.verseTranslationText = dbUserSettings["displaySettings.fontSizes.verseTranslationText"] ?? 'text-sm';
 
 	// Translation settings
 	if (!userSettings.translations) userSettings.translations = {}; // Parent
 
-	userSettings.translations.word = (await db.userSettings.get("translations.word"))?.value ?? 1; // English
+	userSettings.translations.word = dbUserSettings["translations.word"] ?? 1; // English
 
-	const hasDBTranslations = !!(await db.userVerseTranslationsSettings.count());
 	const enabledDBTranslations = await db.userVerseTranslationsSettings.where("enabled").equals(1).primaryKeys();
-	userSettings.translations.verse_v1 = hasDBTranslations ? enabledDBTranslations : [1, 131]; // Transliteration, The Clear Quran
+	userSettings.translations.verse_v1 = enabledDBTranslations.length ? enabledDBTranslations : [1, 131]; // Transliteration, The Clear Quran
 
-	userSettings.translations.tafsir = (await db.userSettings.get("translations.tafsir"))?.value ?? 30; // Tafsir Ibn Kathir
+	userSettings.translations.tafsir = dbUserSettings["translations.tafsir"] ?? 30; // Tafsir Ibn Kathir
 
 	// Transliteration settings
 	if (!userSettings.transliteration) userSettings.transliteration = {}; // Parent
 
-	userSettings.transliteration.word = (await db.userSettings.get("transliteration.word"))?.value ?? 1; // Normal
+	userSettings.transliteration.word = dbUserSettings["transliteration.word"] ?? 1; // Normal
 
 	// Audio settings
 	if (!userSettings.audioSettings) userSettings.audioSettings = {}; // Parent
 
-	userSettings.audioSettings.reciter = (await db.userSettings.get("audioSettings.reciter"))?.value ?? 10; // Mishary Rashid Alafasy
-	userSettings.audioSettings.translationReciter = (await db.userSettings.get("audioSettings.translationReciter"))?.value ?? 1; // English - Ibrahim Walk (Sahih International)
-	userSettings.audioSettings.playbackSpeed = (await db.userSettings.get("audioSettings.playbackSpeed"))?.value ?? 3; // x1
-	userSettings.audioSettings.playTranslation = !!((await db.userSettings.get("audioSettings.reciter"))?.value ?? false); // Verse translation
-	userSettings.audioSettings.versePlayButton = (await db.userSettings.get("audioSettings.versePlayButton"))?.value ?? 1; // Play selected verse
+	userSettings.audioSettings.reciter = dbUserSettings["audioSettings.reciter"] ?? 10; // Mishary Rashid Alafasy
+	userSettings.audioSettings.translationReciter = dbUserSettings["audioSettings.translationReciter"] ?? 1; // English - Ibrahim Walk (Sahih International)
+	userSettings.audioSettings.playbackSpeed = dbUserSettings["audioSettings.playbackSpeed"] ?? 3; // x1
+	userSettings.audioSettings.playTranslation = !!(dbUserSettings["audioSettings.reciter"] ?? false); // Verse translation
+	userSettings.audioSettings.versePlayButton = dbUserSettings["audioSettings.versePlayButton"] ?? 1; // Play selected verse
 
 	// Quiz settings
 	if (!userSettings.quiz) userSettings.quiz = {}; // Parent
 
-	userSettings.quiz.correctAnswers = (await db.userSettings.get("quiz.correctAnswers"))?.value ?? 0;
-	userSettings.quiz.wrongAnswers = (await db.userSettings.get("quiz.wrongAnswers"))?.value ?? 0;
+	userSettings.quiz.correctAnswers = dbUserSettings["quiz.correctAnswers"] ?? 0;
+	userSettings.quiz.wrongAnswers =dbUserSettings["quiz.wrongAnswers"] ?? 0;
 
 	// Last read
-	const lastRead = await db.userSettings.get("lastRead");
+	const lastRead = dbUserSettings["lastRead"];
 	userSettings.lastRead = lastRead ? {key: lastRead?.value, page: lastRead?.value2} : {};
 
 	// User bookmarks
-	const hasDBBookmarks = !!(await db.userBookmarks.count());
 	const enabledDBBookmarks = await db.userBookmarks.where("enabled").equals(1).primaryKeys();
-	userSettings.userBookmarks = hasDBBookmarks ? enabledDBBookmarks : [];
+	userSettings.userBookmarks = enabledDBBookmarks.length ? enabledDBBookmarks : [];
 
 	// User notes
-	const hasDBNotes = !!(await db.userNotes.count());
 	const enabledDBNotes = {};
 	(await db.userNotes.where("value").notEqual("").toArray()).forEach((element) => {
 		enabledDBNotes[element.verseKey] = {
@@ -249,20 +252,21 @@ export async function getUserSettingsOrDefaultFromDB() {
 			modified_at: new Date(element.last_updated).toISOString()
 		};
 	});
-	userSettings.userNotes = hasDBNotes ? enabledDBNotes : {};
+	userSettings.userNotes = enabledDBNotes;
 
 	// Favourite chapters
-	userSettings.favouriteChapters = userSettings.favouriteChapters || [1, 5, 18];
+	const enabledFavourites = await db.favouriteChapters.where("enabled").equals(1).primaryKeys();
+	userSettings.favouriteChapters = enabledFavourites.length ? enabledFavourites : [1, 5, 18];
 
 	// Initial setup
-	userSettings.initialSetupCompleted = !!((await db.userSettings.get("initialSetupCompleted"))?.value ?? false);
+	userSettings.initialSetupCompleted = !!(dbUserSettings["initialSetupCompleted"] ?? false);
 
 	// Chapter number
-	userSettings.chapter = (await db.userSettings.get("chapter"))?.value ?? 1;
+	userSettings.chapter = dbUserSettings["chapter"] ?? 1;
 
 	// One-time modals (is shown?)
 	if (!userSettings.oneTimeModals) userSettings.oneTimeModals = {}; // Parent
-	userSettings.oneTimeModals.changelogModal = !!((await db.userSettings.get("oneTimeModals.changelogModal"))?.value ?? false);
+	userSettings.oneTimeModals.changelogModal = !!(dbUserSettings["oneTimeModals.changelogModal"] ?? false);
 
 	return userSettings;
 }
@@ -276,6 +280,11 @@ export async function setUserSettings() {
 
 	let userSettings = await getUserSettingsOrDefaultFromDB();
 
+	const previousWebsiteTheme = localStorage.getItem('websiteTheme') ?? 1;
 	localStorage.setItem('websiteTheme', userSettings.displaySettings.websiteTheme);
 	initialiseUserSettingsStores(userSettings);
+
+	if (userSettings.displaySettings.websiteTheme != previousWebsiteTheme) {
+		location.reload();
+	}
 }
