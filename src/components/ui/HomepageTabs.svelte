@@ -14,7 +14,8 @@
 	import { term } from '$utils/terminologies';
 	import { fetchVersesData } from '$utils/fetchData';
 	import { splitDelimiter } from '$data/websiteSettings';
-	import { reviewAll, learnFromChapter, getNumberDue, getAllChaptersProgress } from '$utils/learningScheduler';
+	import { reviewAll, learnFromChapter, getDueDatesByVerse, getProgressByChapter } from '$utils/learningScheduler';
+	import { liveQuery } from 'dexie';
 
 	// CSS classes for chapter cards and tabs
 	const cardGridClasses = 'grid md:grid-cols-2 lg:grid-cols-3 gap-3';
@@ -43,10 +44,24 @@
 	$: totalBookmarks = $__userBookmarks.length;
 	$: totalNotes = Object.keys($__userNotes).length;
 
-	// Reactive variables to fetch review and learn data when on the learn tab
-	$: allChaptersProgress = activeTab === 5 && !$__learnModalVisible ? getAllChaptersProgress() : null;
-	$: numberDue = !$__learnModalVisible && getNumberDue();
-	setInterval(() => numberDue = getNumberDue(), 60 * 1000);
+	// Reactive variables to fetch review and learn data when relevant data changes
+	let numberDue;
+	$: dueDatesByVerse = liveQuery(async () => {
+		return await getDueDatesByVerse();
+	});
+	function setNumberDue(dueDatesByVerse) {
+		if (dueDatesByVerse) {
+			numberDue = dueDatesByVerse.filter(dueDate => dueDate[2] < new Date()).length;
+		}
+	}
+	$: setNumberDue($dueDatesByVerse);
+	setInterval(() => {
+		setNumberDue($dueDatesByVerse);
+	}, 60 * 1000);
+
+	$: progressByChapter = liveQuery(async() => {
+		return await getProgressByChapter();
+	})
 
 	// Remove 'invisible' class from chapter icons once fonts are loaded
 	document.fonts.ready.then(() => {
@@ -258,21 +273,27 @@
 			<div>
 				<button
 					class="py-1 w-full w-fit mr-2 mt-2 mb-6 {buttonClasses}" 
-					on:click={() => {reviewAll()}}
+					on:click={() => {
+						//TODO loading
+						reviewAll()
+					}}
 					disabled={!numberDue}
-				>
-					<h3 class="text-lg font-medium">Review - {numberDue} due</h3>
+				>	
+					<h3 class="text-lg font-medium">Review - {numberDue ?? 0} due</h3>
 				</button>
 
 				<h3 class="text-xl font-semibold">Learn new verses</h3>
 
-				{#if allChaptersProgress}
+				{#if $progressByChapter}
 				{#each [...quranMetaData] as { id }, i}
 					{#if id > 0}
 						<button
 							class="py-1 w-full"
-							on:click={() => {learnFromChapter(id)}}
-							disabled={!allChaptersProgress[id].unseen.length}
+							on:click={() => {
+								//TODO loading
+								learnFromChapter(id)
+							}}
+							disabled={!$progressByChapter[id]?.unseen.length}
 						>
 							<div class="{cardInnerClasses} flex-col-reverse md:flex-row text-center items-center">
 								<div class="flex justify-between w-full">
@@ -296,13 +317,14 @@
 											{term('verses')}
 										</div>
 									</div>
+
 									<div class="flex flex-row items-right w-32">
 										<div class="text-right pr-2 w-10">
-											{allChaptersProgress[id].unseen.length} <br>
-											{allChaptersProgress[id].learning.length} <br>
-											{allChaptersProgress[id].acquired.length} <br>
-											{allChaptersProgress[id].stable.length} <br>
-											{allChaptersProgress[id].established.length} <br>
+											{$progressByChapter[id]?.unseen.length ?? 0} <br>
+											{$progressByChapter[id]?.learning.length ?? 0} <br>
+											{$progressByChapter[id]?.acquired.length ?? 0} <br>
+											{$progressByChapter[id]?.stable.length ?? 0} <br>
+											{$progressByChapter[id]?.established.length ?? 0} <br>
 										</div>
 										<div class="text-left">
 											Unseen <br>

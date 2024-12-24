@@ -21,12 +21,15 @@
 	let correctIndex = 0;
 	let stage = 0;
 
+	let buttonsDisabled = false;
+
 	$: {
 		verseData = null;
 		verseKeys = [null, null, null];
 		hiddenIndex = 0;
 		correctIndex = 0;
 		stage = 0;
+		buttonsDisabled = false;
 
 		chapterNumber = $__verseKey.split(':')[0];
 		verseNumber = $__verseKey.split(':')[1];
@@ -51,21 +54,26 @@
 		$__learnModalVisible;
 	}
 
-	function showNextCard(totalWords) {
-		rescheduleVerse($__verseKey, correctIndex, totalWords);
-		const nextVerseKey = getNextDueFromChapter(chapterNumber);
+	async function showNextCard(totalWords) {
+		await rescheduleVerse(chapterNumber, verseNumber, correctIndex, totalWords);
+		const nextVerseKey = await getNextDueFromChapter(chapterNumber);
 		if (nextVerseKey != null) {
 			__verseKey.set(nextVerseKey);
 			return true;
 		} else {
 			if ($__learnMode == "review") {
-				if (reviewAll()) return true;
+				if (await reviewAll()) return true;
 			} else if ($__learnMode == "learn") {
-				if (learnFromChapter(chapterNumber)) return true;
+				if (await learnFromChapter(chapterNumber)) return true;
 			}
 			__learnModalVisible.set(false);
 			return false;
 		}
+	}
+
+	async function finish(totalWords) {
+		await rescheduleVerse(chapterNumber, verseNumber, correctIndex, totalWords);
+		__learnModalVisible.set(false);
 	}
 </script>
 
@@ -163,39 +171,47 @@
 
 	{#if stage == 0 || stage == 1}
 	<div class="flex flex=row mt-6 mb-1">
-		<button on:click={() => {
-			if (stage == 0 && hiddenIndex <= data[verseKeys[2]].meta.words) {
-				hiddenIndex += 1;
-				if (hiddenIndex > data[verseKeys[2]].meta.words) {
-					correctIndex = hiddenIndex;
+		<button
+			on:click={() => {
+				if (stage == 0 && hiddenIndex <= data[verseKeys[2]].meta.words) {
+					hiddenIndex += 1;
+					if (hiddenIndex > data[verseKeys[2]].meta.words) {
+						correctIndex = hiddenIndex;
+					}
+					else {
+						correctIndex = Math.max(hiddenIndex - 1, 0);
+					}
+					cursor1?.setIndex(hiddenIndex);
+				} else if (stage == 1 && correctIndex <= data[verseKeys[2]].meta.words) {
+					correctIndex += 1;
+					if (correctIndex >= hiddenIndex) hiddenIndex = correctIndex + 1;
+					cursor2?.setIndex(correctIndex);
 				}
-				else {
-					correctIndex = Math.max(hiddenIndex - 1, 0);
+				
+			}} 
+			class="w-full mr-2 {buttonClasses}"
+			disabled={buttonsDisabled}
+		>Move Left {buttonsDisabled}</button>
+		<button 
+			on:click={() => {
+				if (stage == 0 && hiddenIndex > 0) {
+					hiddenIndex -= 1;
+					if (hiddenIndex > data[verseKeys[2]].meta.words) {
+						correctIndex = hiddenIndex;
+					}
+					else {
+						correctIndex = Math.max(hiddenIndex - 1, 0);
+					}
+					cursor1?.setIndex(hiddenIndex);
+				} else if (stage == 1 && correctIndex > 0) {
+					correctIndex -= 1;
+					if (correctIndex >= hiddenIndex) hiddenIndex = correctIndex + 1;
+					cursor2?.setIndex(correctIndex);
 				}
-				cursor1?.setIndex(hiddenIndex);
-			} else if (stage == 1 && correctIndex <= data[verseKeys[2]].meta.words) {
-				correctIndex += 1;
-				if (correctIndex >= hiddenIndex) hiddenIndex = correctIndex + 1;
-				cursor2?.setIndex(correctIndex);
-			}
-			
-		}} class="w-full mr-2 {buttonClasses}">Move Left</button>
-		<button on:click={() => {
-			if (stage == 0 && hiddenIndex > 0) {
-				hiddenIndex -= 1;
-				if (hiddenIndex > data[verseKeys[2]].meta.words) {
-					correctIndex = hiddenIndex;
-				}
-				else {
-					correctIndex = Math.max(hiddenIndex - 1, 0);
-				}
-				cursor1?.setIndex(hiddenIndex);
-			} else if (stage == 1 && correctIndex > 0) {
-				correctIndex -= 1;
-				if (correctIndex >= hiddenIndex) hiddenIndex = correctIndex + 1;
-				cursor2?.setIndex(correctIndex);
-			}
-		}} class="w-full mr-2 {buttonClasses}">Move Right</button>
+			}} 
+			class="w-full mr-2 {buttonClasses}"
+			disabled={buttonsDisabled}
+		>Move Right</button>
 	</div>
 	{/if}
 
@@ -207,6 +223,7 @@
 		<button
 			on:click={() => {
 				if (correctIndex > data[verseKeys[2]].meta.words) {
+					buttonsDisabled = true;
 					showNextCard(data[verseKeys[2]].meta.words);
 				} else {
 					stage = 2;
@@ -214,6 +231,7 @@
 				}
 			}}
 			class="w-full mr-2 {buttonClasses}"
+			disabled={buttonsDisabled}
 		>{
 			(correctIndex > data[verseKeys[2]].meta.words) ? "Next - No mistakes"
 			: (correctIndex == data[verseKeys[2]].meta.words) ? "Next - Forgot the end of the verse"
@@ -223,16 +241,19 @@
 		{#if stage == 2}
 		<button
 			on:click={() => {
+				buttonsDisabled = true;
 				showNextCard(data[verseKeys[2]].meta.words);
 			}}
 			class="w-full mr-2 {buttonClasses}"
+			disabled={buttonsDisabled}
 		>Next</button>
 		<button
 			on:click={() => {
-				rescheduleVerse($__verseKey, correctIndex, data[verseKeys[2]].meta.words);
-				__learnModalVisible.set(false);
+				buttonsDisabled = true;
+				finish(data[verseKeys[2]].meta.words);
 			}}
 			class="w-fit mr-2 {buttonClasses}"
+			disabled={buttonsDisabled}
 		>Finish</button>
 		{/if}
 	</div>

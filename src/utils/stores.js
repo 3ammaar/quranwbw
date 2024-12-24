@@ -65,13 +65,10 @@ let __websiteOnline,
 	__wordRoot,
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
-	__verseReviewDueDates,
-	__learnMode,
-	__wordInVerseReviewCards;
+	__learnMode;
 
 if (browser) {
-	const userSettings = JSON.parse(localStorage.getItem('userSettings'));
-
+	
 	// to store network status of website
 	__websiteOnline = writable(true);
 
@@ -99,6 +96,96 @@ if (browser) {
 	// to store the verse key
 	__verseKey = writable('1:1');
 
+	// to store the token
+	__userToken = writable(localStorage.getItem('userToken'));
+
+	// to store the word timestamp data fetched from the API
+	__timestampData = writable(null);
+
+	// to store the display type - WBW, Normal, Continuous, etc...
+	__selectedDisplayId = writable(1);
+
+	// to store a random number (for now) when changing verses due to some issues while re-rendering the component (probably because I'm still learning Svelte)
+	__pageURL = writable(null);
+
+	// to store the toggle boolean settings drawer
+	__settingsDrawerHidden = writable(true);
+
+	// to store the toggle boolean for top navbar,
+	__topNavbarVisible = writable(true);
+
+	// to store the toggle boolean for bottom navbar
+	__bottomToolbarVisible = writable(true);
+
+	// to store the chapters and juz info of a mushaf page
+	__mushafPageDivisions = writable(null);
+
+	// to store the bottom alert info
+	__bottomAlert = writable({
+		visible: false,
+		message: '...'
+	});
+
+	// to store all the audio settings
+	__audioSettings = writable({
+		isPlaying: false,
+		timesToRepeat: 1,
+		timesRepeated: 0,
+		delay: 0
+	});
+
+	// to store the morphology verse/word key
+	__morphologyKey = writable(null);
+
+	// to store all the offline data settings
+	__downloadedDataSettings = writable({
+		allChaptersDownloaded: false,
+		downloadedChapters: []
+	});	
+
+	// to store the first verse on page
+	__firstVerseOnPage = writable(1);
+
+	// modals & drawers ===============
+	__audioModalVisible = writable(false);
+	__notesModalVisible = writable(false);
+	__tajweedRulesModalVisible = writable(false);
+	__tokenModalVisible = writable(false);
+	__tafsirModalVisible = writable(false);
+	__quranNavigationModalVisible = writable(false);
+	__siteNavigationModalVisible = writable(false);
+	__settingsSelectorModal = writable({
+		visible: false
+	});
+	__lexiconModalVisible = writable(false);
+	__changelogModalVisible = writable(false);
+	__verseTranslationModalVisible = writable(false);
+	__morphologyModalVisible = writable(false);
+	__learnModalVisible = writable(false);
+
+	// for al-kahf on friday and al-mulk at night
+	__timeSpecificChapters = writable({
+		isFriday: false,
+		isNight: false
+	});
+
+	// to store the word root for showing lexicon data
+	__wordRoot = writable(null);
+
+	// functionalities of the play buttons
+	__playButtonsFunctionality = writable({
+		verse: 1, // default is "play this verse"
+		toolbar: 1 // default is "play from start"
+	});
+
+	// used to hide elements on pinch
+	__mushafMinimalModeEnabled = writable(false);
+
+	// used to indicate whether to just review past cards or to also learn new cards, or neither
+	__learnMode = writable(null);
+}
+
+export function initialiseUserSettingsStores(userSettings) {
 	// to store the local user settings from LocalStorage
 	__userSettings = writable(JSON.stringify(userSettings));
 
@@ -107,9 +194,6 @@ if (browser) {
 
 	// to store the user bookmarks
 	__userBookmarks = writable(userSettings.userBookmarks);
-
-	// to store the token
-	__userToken = writable(localStorage.getItem('userToken'));
 
 	// to store the font type - Uthmani, IndoPak, etc...
 	__fontType = writable(userSettings.displaySettings.fontType);
@@ -135,10 +219,7 @@ if (browser) {
 	// to store reciter
 	__reciter = writable(userSettings.audioSettings.reciter);
 	__translationReciter = writable(userSettings.audioSettings.translationReciter);
-
-	// to store the word timestamp data fetched from the API
-	__timestampData = writable(null);
-
+	
 	// to store playback speed
 	__playbackSpeed = writable(userSettings.audioSettings.playbackSpeed);
 
@@ -147,7 +228,6 @@ if (browser) {
 
 	// to store the display type - WBW, Normal, Continuous, etc...
 	__displayType = writable(userSettings.displaySettings.displayType);
-	__selectedDisplayId = writable(1);
 
 	// to store the website theme
 	__websiteTheme = writable(userSettings.displaySettings.websiteTheme);
@@ -158,69 +238,11 @@ if (browser) {
 	// to store the user's favourite chapters
 	__favouriteChapters = writable(userSettings.favouriteChapters);
 
-	// to store a random number (for now) when changing verses due to some issues while re-rendering the component (probably because I'm still learning Svelte)
-	__pageURL = writable(null);
-
-	// to store the toggle boolean settings drawer
-	__settingsDrawerHidden = writable(true);
-
-	// to store the toggle boolean for top navbar,
-	__topNavbarVisible = writable(true);
-
-	// to store the toggle boolean for bottom navbar
-	__bottomToolbarVisible = writable(true);
-
-	// to store the chapters and juz info of a mushaf page
-	__mushafPageDivisions = writable(null);
-
 	// to store the word tooltip type
 	__wordTooltip = writable(userSettings.displaySettings.wordTooltip);
 
-	// to store the bottom alert info
-	__bottomAlert = writable({
-		visible: false,
-		message: '...'
-	});
-
-	// to store all the audio settings
-	__audioSettings = writable({
-		isPlaying: false,
-		timesToRepeat: 1,
-		timesRepeated: 0,
-		delay: 0
-	});
-
-	// to store the morphology verse/word key
-	__morphologyKey = writable(null);
-
-	// to store all the offline data settings
-	__downloadedDataSettings = writable({
-		allChaptersDownloaded: false,
-		downloadedChapters: []
-	});
-
 	// to store the auto scroll speed
 	__autoScrollSpeed = writable(userSettings.displaySettings.autoScrollSpeed);
-
-	// to store the first verse on page
-	__firstVerseOnPage = writable(1);
-
-	// modals & drawers ===============
-	__audioModalVisible = writable(false);
-	__notesModalVisible = writable(false);
-	__tajweedRulesModalVisible = writable(false);
-	__tokenModalVisible = writable(false);
-	__tafsirModalVisible = writable(false);
-	__quranNavigationModalVisible = writable(false);
-	__siteNavigationModalVisible = writable(false);
-	__settingsSelectorModal = writable({
-		visible: false
-	});
-	__lexiconModalVisible = writable(false);
-	__changelogModalVisible = writable(false);
-	__verseTranslationModalVisible = writable(false);
-	__morphologyModalVisible = writable(false);
-	__learnModalVisible = writable(false);
 
 	// wake lock settings
 	__wakeLockEnabled = writable(userSettings.displaySettings.wakeLockEnabled);
@@ -229,38 +251,84 @@ if (browser) {
 	__quizCorrectAnswers = writable(userSettings.quiz.correctAnswers);
 	__quizWrongAnswers = writable(userSettings.quiz.wrongAnswers);
 
-	// for al-kahf on friday and al-mulk at night
-	__timeSpecificChapters = writable({
-		isFriday: false,
-		isNight: false
-	});
-
 	// english/arabic Quranic terms
 	__englishTerminology = writable(userSettings.displaySettings.englishTerminology);
 
 	// show/hide non-dua words
 	__hideNonDuaPart = writable(userSettings.displaySettings.hideNonDuaPart);
+}
 
-	// to store the word root for showing lexicon data
-	__wordRoot = writable(null);
+export function setUserSettingsStores(userSettings) {
+	// to store the local user settings from LocalStorage
+	__userSettings.set(JSON.stringify(userSettings));
 
-	// functionalities of the play buttons
-	__playButtonsFunctionality = writable({
-		verse: 1, // default is "play this verse"
-		toolbar: 1 // default is "play from start"
-	});
+	// to store the user notes
+	__userNotes.set(userSettings.userNotes);
 
-	// used to hide elements on pinch
-	__mushafMinimalModeEnabled = writable(false);
+	// to store the user bookmarks
+	__userBookmarks.set(userSettings.userBookmarks);
 
-	// review due dates of each verse
-	__verseReviewDueDates = writable(userSettings.verseReviewDueDates);
+	// to store the font type - Uthmani, IndoPak, etc...
+	__fontType.set(userSettings.displaySettings.fontType);
 
-	// used to indicate whether to just review past cards or to also learn new cards, or neither
-	__learnMode = writable(null);
+	// to store the word translation
+	__wordTranslation.set(userSettings.translations.word);
 
-	// FSRS cards for each verse, one per word
-	__wordInVerseReviewCards = writable(userSettings.wordInVerseReviewCards);
+	// to store the word transliteration
+	__wordTransliteration.set(userSettings.transliteration.word);
+
+	// to store the verse translations
+	__verseTranslations.set(userSettings.translations.verse_v1);
+
+	// to store the verse tafisr
+	__verseTafsir.set(userSettings.translations.tafsir);
+
+	// to store the word translation toggle
+	__wordTranslationEnabled.set(userSettings.displaySettings.wordTranslationEnabled);
+
+	// to store the word transliteration toggle
+	__wordTransliterationEnabled.set(userSettings.displaySettings.wordTransliterationEnabled);
+
+	// to store reciter
+	__reciter.set(userSettings.audioSettings.reciter);
+	__translationReciter.set(userSettings.audioSettings.translationReciter);
+	
+	// to store playback speed
+	__playbackSpeed.set(userSettings.audioSettings.playbackSpeed);
+
+	// to store the toggle boolean for play translation
+	__playTranslation.set(userSettings.audioSettings.playTranslation);
+
+	// to store the display type - WBW, Normal, Continuous, etc...
+	__displayType.set(userSettings.displaySettings.displayType);
+
+	// to store the website theme
+	__websiteTheme.set(userSettings.displaySettings.websiteTheme);
+
+	// to store the last read key
+	__lastRead.set(userSettings.lastRead);
+
+	// to store the user's favourite chapters
+	__favouriteChapters.set(userSettings.favouriteChapters);
+
+	// to store the word tooltip type
+	__wordTooltip.set(userSettings.displaySettings.wordTooltip);
+
+	// to store the auto scroll speed
+	__autoScrollSpeed.set(userSettings.displaySettings.autoScrollSpeed);
+
+	// wake lock settings
+	__wakeLockEnabled.set(userSettings.displaySettings.wakeLockEnabled);
+
+	// quiz settings
+	__quizCorrectAnswers.set(userSettings.quiz.correctAnswers);
+	__quizWrongAnswers.set(userSettings.quiz.wrongAnswers);
+
+	// english/arabic Quranic terms
+	__englishTerminology.set(userSettings.displaySettings.englishTerminology);
+
+	// show/hide non-dua words
+	__hideNonDuaPart.set(userSettings.displaySettings.hideNonDuaPart);
 }
 
 export {
@@ -328,7 +396,5 @@ export {
 	__wordRoot,
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
-	__verseReviewDueDates,
 	__learnMode,
-	__wordInVerseReviewCards
 };
