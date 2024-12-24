@@ -11,8 +11,8 @@ async function moveUserSettingsFromLocalStorage() {
 	if (!userSettings) return;
 	const now = new Date();
 
+	// Display settings
 	if (userSettings.displaySettings) {
-
 		if (userSettings.displaySettings.websiteTheme != null) await db.userSettings.put(
 			{name: "displaySettings.displayType", value: userSettings.displaySettings.websiteTheme, last_updated: now}
 		);
@@ -76,11 +76,10 @@ async function moveUserSettingsFromLocalStorage() {
 			{name: "translations.word", value: userSettings.translations.word, last_updated: now}
 		);
 
-		if (userSettings.translations.verse_v1 != null) userSettings.translations.verse_v1.forEach(async (translation) => {
-			await db.userVerseTranslationsSettings.put(
-				{name: translation, enabled: 1, last_updated: now}
-			);
-		});
+		if (userSettings.translations.verse_v1 != null) await db.userVerseTranslationsSettings.bulkPut(
+			userSettings.translations.verse_v1
+				.map((translation) => ({name: translation, enabled: 1, last_updated: now}))
+		);
 
 		if (userSettings.translations.tafsir != null) await db.userSettings.put(
 			{name: "translations.tafsir", value: userSettings.translations.tafsir, last_updated: now}
@@ -134,25 +133,22 @@ async function moveUserSettingsFromLocalStorage() {
 	);
 
 	// User bookmarks
-	if (userSettings.userBookmarks != null) userSettings.userBookmarks.forEach(async (verseKey) => {
-		await db.userBookmarks.put(
-			{verseKey: verseKey, enabled: 1, last_updated: now}
-		);
-	});
+	if (userSettings.userBookmarks != null) await db.userBookmarks.bulkPut(
+		userSettings.userBookmarks
+			.map((verseKey) => ({verseKey: verseKey, enabled: 1, last_updated: now}))
+	);
 
 	// User notes
-	if (userSettings.userNotes != null) Object.entries(userSettings.userNotes).forEach(async ([verseKey, note]) => {
-		await db.userNotes.put(
-			{verseKey: verseKey, value: note.note, last_updated: note.modified_at}
-		);
-	});
+	if (userSettings.userNotes != null) await db.userNotes.bulkPut(
+		Object.entries(userSettings.userNotes)
+			.map(([verseKey, note]) => ({verseKey: verseKey, value: note.note, last_updated: note.modified_at}))
+	);
 
 	// Favourite chapters
-	if (userSettings.favouriteChapters != null) userSettings.favouriteChapters.forEach(async (verseKey) => {
-		await db.favouriteChapters.put(
-			{verseKey: verseKey, enabled: 1, last_updated: now}
-		);
-	});
+	if (userSettings.favouriteChapters != null) await db.favouriteChapters.bulkPut(
+		userSettings.favouriteChapters
+			.map((verseKey) => ({verseKey: verseKey, enabled: 1, last_updated: now}))
+	);
 
 	// Initial setup
 	if (userSettings.initialSetupCompleted != null) await db.userSettings.put(
@@ -174,23 +170,14 @@ async function moveUserSettingsFromLocalStorage() {
 	localStorage.removeItem('userSettings');
 }
 
-/**
- * Sets the default user settings in localStorage.
- * This function is also used by resetSettings.js.
- */
-export async function setUserSettings() {
+async function getUserSettingsFromDB() {
 	let userSettings = {};
-	moveUserSettingsFromLocalStorage();
-
 	let arabicTextSize = 'text-2xl';
 
 	// For larger screens, make 'text-4xl' the default for Arabic word, else keep 'text-2xl' as default.
 	if (window.matchMedia('(min-width: 1280px)').matches || window.matchMedia('(min-width: 1024px)').matches || window.matchMedia('(min-width: 768px)').matches) {
 		arabicTextSize = 'text-4xl';
 	}
-
-	// Initialize userSettings if not set
-	if (!userSettings) userSettings = {};
 
 	// Display settings
 	if (!userSettings.displaySettings) userSettings.displaySettings = {}; // Parent
@@ -307,6 +294,18 @@ export async function setUserSettings() {
 
 	userSettings.oneTimeModals.changelogModal = !!((await db.userSettings.get("oneTimeModals.changelogModal"))?.value ?? 
 		userSettings.oneTimeModals.changelogModal ?? false);
+
+	return userSettings;
+}
+
+/**
+ * Sets the default user settings in localStorage.
+ * This function is also used by resetSettings.js.
+ */
+export async function setUserSettings() {
+	moveUserSettingsFromLocalStorage();
+
+	let userSettings = await getUserSettingsFromDB();
 
 	// Save updated userSettings to localStorage
 	localStorage.setItem('websiteTheme', userSettings.displaySettings.websiteTheme);
