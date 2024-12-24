@@ -18,7 +18,7 @@
 	import MorphologyModal from '$ui/Modals/MorphologyModal.svelte';
 	import LearnModal from '$ui/Modals/LearnModal.svelte';
 
-	import { __websiteOnline, __currentPage, __chapterNumber, __settingsDrawerHidden, __wakeLockEnabled, __userToken, __fontType, __wordTranslation, __verseTranslations, __selectedDisplayId, __mushafMinimalModeEnabled, __topNavbarVisible, __bottomToolbarVisible } from '$utils/stores';
+	import { __websiteOnline, __currentPage, __chapterNumber, __settingsDrawerHidden, __wakeLockEnabled, __userToken, __fontType, __wordTranslation, __verseTranslations, __selectedDisplayId, __mushafMinimalModeEnabled, __topNavbarVisible, __bottomToolbarVisible, __userSettings } from '$utils/stores';
 	import { checkOldBookmarks } from '$utils/checkOldBookmarks';
 	import { debounce } from '$utils/debounce';
 	import { toggleNavbar } from '$utils/toggleNavbar';
@@ -109,7 +109,7 @@
 				__fontType.set(2); // Default font
 			}
 		} else {
-			const userSettings = JSON.parse(localStorage.getItem('userSettings'));
+			const userSettings = JSON.parse($__userSettings);
 
 			updateSettings({ type: 'displayType', value: userSettings.displaySettings.displayType });
 			__selectedDisplayId.set(userSettings.displaySettings.displayType);

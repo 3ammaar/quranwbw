@@ -25,5 +25,6 @@ db.version(1).stores({
   userSettings: `name, value, value2, last_updated`,
   userVerseTranslationsSettings: `name, enabled, last_updated`,
   userBookmarks: `verseKey, enabled, last_updated`,
-  userNotes: `verseKey, value, last_updated`
+  userNotes: `verseKey, value, last_updated`,
+  favouriteChapters: `verseKey, enabled, last_updated`
 });

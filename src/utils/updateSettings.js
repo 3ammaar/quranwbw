@@ -29,13 +29,11 @@ import {
 	__playButtonsFunctionality,
 } from '$utils/stores';
 import { db } from '$utils/dexieDB';
-import { setUserSettingsStores } from './stores';
 // import { uploadSettingsToCloud } from '$utils/cloudSettings';
 
 // function to update website settings
 export function updateSettings(props) {
-	// get the settings from localStorage
-	const userSettings = JSON.parse(localStorage.getItem('userSettings'));
+	const userSettings = JSON.parse(get(__userSettings));
 	// let uploadSettings = false;
 
 	switch (props.type) {
@@ -81,6 +79,7 @@ export function updateSettings(props) {
 			__websiteTheme.set(props.value);
 			userSettings.displaySettings.websiteTheme = props.value;
 			db.userSettings.put({name: "displaySettings.websiteTheme", value: props.value, last_updated: new Date()});
+			localStorage.setItem('websiteTheme', props.value);
 			location.reload();
 			// document.documentElement.classList = '';
 			// document.documentElement.classList = `theme-${props.value} ${window.bodyColors[props.value]}`;
@@ -150,7 +149,6 @@ export function updateSettings(props) {
 			__translationReciter.set(props.value);
 			userSettings.audioSettings.translationReciter = props.value;
 			db.userSettings.put({name: "audioSettings.translationReciter", value: props.value, last_updated: new Date()});
-
 			break;
 
 		// for playback speed
@@ -185,7 +183,11 @@ export function updateSettings(props) {
 
 			// if override key was set, then just set the value key in localStorage
 			if (props.override) {
-				userSettings.userBookmarks = key;
+				userBookmarks = key;
+				const now = new Date();
+				db.userBookmarks.clear().then(() => {
+					db.userBookmarks.bulkAdd(key.map(bookmark => ({verseKey: bookmark, enabled: 1, last_updated: now})));
+				});
 			}
 
 			// else just set what was provided as key invidually post validation
@@ -199,15 +201,17 @@ export function updateSettings(props) {
 				// if the bookmark (key) already exists, then remove it, else add it
 				else userBookmarks.includes(key) ? (userBookmarks = userBookmarks.filter((x) => x !== key)) : userBookmarks.push(key);
 
-				// update the bookmarks
-				userSettings.userBookmarks = userBookmarks;
+				
+				
 				if (userBookmarks.includes(key)) {
-					db.userBookmarks.put({verseKey: key, enabled: 1, last_updated: new Date()});
+					// db.userBookmarks.put({verseKey: key, enabled: 1, last_updated: new Date()});
 				} else {
-					db.userBookmarks.put({verseKey: key, enabled: 0, last_updated: new Date()});
+					// db.userBookmarks.put({verseKey: key, enabled: 0, last_updated: new Date()});
 				}
 			}
 
+			// update the bookmarks
+			userSettings.userBookmarks = userBookmarks;
 			__userBookmarks.set(userBookmarks);
 
 			// upload settings to cloud on every update
@@ -219,10 +223,16 @@ export function updateSettings(props) {
 			const notes_key = props.key;
 			const isWhitespaceString = (str) => !str.replace(/\s/g, '').length;
 			let userNotes = userSettings['userNotes'];
-
 			// if override key was set, then just set the value key in localStorage
 			if (props.override) {
-				userSettings.userNotes = notes_key;
+				userNotes = notes_key;
+				db.userBookmarks.clear().then(() => {
+					db.userBookmarks.bulkAdd(
+						Object.entries(notes_key).map(
+							([verseKey, note]) => ({verseKey: verseKey, value: note.note, last_updated: note.modified_at})
+						)
+					);
+				});
 			}
 
 			// else just set what was provided as key invidually post validation
@@ -238,12 +248,11 @@ export function updateSettings(props) {
 					if (Object.prototype.hasOwnProperty.call(userNotes, notes_key)) delete userNotes[notes_key];
 				}
 
-				// update the notes
-				userSettings.userNotes = userNotes;
-
 				db.userNotes.put({verseKey: notes_key, value: userNotes[notes_key]?.note ?? "", last_updated: now});
 			}
 
+			// update the notes
+			userSettings.userNotes = userNotes;
 			__userNotes.set(userNotes);
 
 			// upload settings to cloud on every update
@@ -308,12 +317,13 @@ export function updateSettings(props) {
 		case 'arabicText': // Arabic words
 		case 'wordTranslationText': // word translations & transliterations
 		case 'verseTranslationText': // verse translations & transliterations
+
+			// set the new index and size
+			const newSize = props.value;
+
 			// change the font size for each 'element'
 			document.querySelectorAll(`.${props.type}`).forEach((element) => {
 				const currentSize = element.getAttribute('data-fontSize');
-
-				// set the new index and size
-				let newSize = props.value;
 
 				// perform the action
 				if (newSize !== undefined) {
@@ -325,21 +335,19 @@ export function updateSettings(props) {
 
 					// update the attribute
 					element.setAttribute('data-fontSize', newSize);
-
-					// update it in localSettings
-					userSettings.displaySettings.fontSizes[`${props.type}`] = newSize;
-					db.userSettings.put({name: `displaySettings.fontSizes.${props.type}`, value: newSize, last_updated: new Date()});
 				}
 			});
+
+			// update it in localSettings
+			userSettings.displaySettings.fontSizes[`${props.type}`] = newSize;
+			db.userSettings.put({name: `displaySettings.fontSizes.${props.type}`, value: newSize, last_updated: new Date()});
+
 			break;
 			
 	}
 
 	// update the settings back into localStorage and global store
-	__userSettings.set(JSON.stringify(userSettings));
-	localStorage.setItem('userSettings', JSON.stringify(userSettings));
-	setUserSettingsStores(userSettings);
-	
+	__userSettings.set(JSON.stringify(userSettings));	
 
 	// upload settings to cloud if uploadSettings was set to true, which we only do for bookmarks and notes at the moment
 	// if (uploadSettings === true) uploadSettingsToCloud();

@@ -185,7 +185,7 @@ if (browser) {
 	__learnMode = writable(null);
 }
 
-export function setUserSettingsStores(userSettings) {
+export function initialiseUserSettingsStores(userSettings) {
 	// to store the local user settings from LocalStorage
 	__userSettings = writable(JSON.stringify(userSettings));
 
@@ -256,6 +256,79 @@ export function setUserSettingsStores(userSettings) {
 
 	// show/hide non-dua words
 	__hideNonDuaPart = writable(userSettings.displaySettings.hideNonDuaPart);
+}
+
+export function setUserSettingsStores(userSettings) {
+	// to store the local user settings from LocalStorage
+	__userSettings.set(JSON.stringify(userSettings));
+
+	// to store the user notes
+	__userNotes.set(userSettings.userNotes);
+
+	// to store the user bookmarks
+	__userBookmarks.set(userSettings.userBookmarks);
+
+	// to store the font type - Uthmani, IndoPak, etc...
+	__fontType.set(userSettings.displaySettings.fontType);
+
+	// to store the word translation
+	__wordTranslation.set(userSettings.translations.word);
+
+	// to store the word transliteration
+	__wordTransliteration.set(userSettings.transliteration.word);
+
+	// to store the verse translations
+	__verseTranslations.set(userSettings.translations.verse_v1);
+
+	// to store the verse tafisr
+	__verseTafsir.set(userSettings.translations.tafsir);
+
+	// to store the word translation toggle
+	__wordTranslationEnabled.set(userSettings.displaySettings.wordTranslationEnabled);
+
+	// to store the word transliteration toggle
+	__wordTransliterationEnabled.set(userSettings.displaySettings.wordTransliterationEnabled);
+
+	// to store reciter
+	__reciter.set(userSettings.audioSettings.reciter);
+	__translationReciter.set(userSettings.audioSettings.translationReciter);
+	
+	// to store playback speed
+	__playbackSpeed.set(userSettings.audioSettings.playbackSpeed);
+
+	// to store the toggle boolean for play translation
+	__playTranslation.set(userSettings.audioSettings.playTranslation);
+
+	// to store the display type - WBW, Normal, Continuous, etc...
+	__displayType.set(userSettings.displaySettings.displayType);
+
+	// to store the website theme
+	__websiteTheme.set(userSettings.displaySettings.websiteTheme);
+
+	// to store the last read key
+	__lastRead.set(userSettings.lastRead);
+
+	// to store the user's favourite chapters
+	__favouriteChapters.set(userSettings.favouriteChapters);
+
+	// to store the word tooltip type
+	__wordTooltip.set(userSettings.displaySettings.wordTooltip);
+
+	// to store the auto scroll speed
+	__autoScrollSpeed.set(userSettings.displaySettings.autoScrollSpeed);
+
+	// wake lock settings
+	__wakeLockEnabled.set(userSettings.displaySettings.wakeLockEnabled);
+
+	// quiz settings
+	__quizCorrectAnswers.set(userSettings.quiz.correctAnswers);
+	__quizWrongAnswers.set(userSettings.quiz.wrongAnswers);
+
+	// english/arabic Quranic terms
+	__englishTerminology.set(userSettings.displaySettings.englishTerminology);
+
+	// show/hide non-dua words
+	__hideNonDuaPart.set(userSettings.displaySettings.hideNonDuaPart);
 }
 
 export {

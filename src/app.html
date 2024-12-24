@@ -49,8 +49,7 @@
 
 			function theme(type) {
 				try {
-					const userSettings = JSON.parse(localStorage.getItem('userSettings'));
-					const currentTheme = userSettings ? +userSettings.displaySettings.websiteTheme : 1;
+					const currentTheme = localStorage.getItem('websiteTheme') ?? 1;
 
 					const themes = {
 						1: {
@@ -242,16 +241,8 @@
 			let currentTheme;
 
 			try {
-				// Try to retrieve the user settings from localStorage and parse the JSON string
-				const userSettings = JSON.parse(localStorage.getItem('userSettings'));
-
-				// Check if displaySettings and websiteTheme exist in the parsed object
-				if (userSettings && userSettings.displaySettings && userSettings.displaySettings.websiteTheme !== undefined) {
-					currentTheme = userSettings.displaySettings.websiteTheme;
-				} else {
-					// Default theme in case the properties don't exist
-					currentTheme = 1;
-				}
+				// Try to retrieve the website theme settings from localStorage
+				currentTheme = localStorage.getItem('websiteTheme') ?? 1;
 			} catch (error) {
 				// If there's an error during JSON parsing or any other issue, fallback to default theme
 				currentTheme = 1;

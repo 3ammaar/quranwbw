@@ -1,6 +1,6 @@
 <script>
 	import Chapter from '$display/verses/modes/Chapter.svelte';
-	import { __currentPage, __chapterData, __fontType, __displayType } from '$utils/stores';
+	import { __currentPage, __chapterData, __fontType, __displayType, __userSettings } from '$utils/stores';
 	import { selectableDisplays, selectableFontTypes } from '$data/options';
 	import { updateSettings } from '$utils/updateSettings';
 	import { toggleModal } from '$utils/toggleModal';
@@ -9,7 +9,7 @@
 	// show the setup modal on first visit except on the home page
 	$: {
 		if ($__currentPage === 'chapter') {
-			const userSettings = JSON.parse(localStorage.getItem('userSettings'));
+			const userSettings = JSON.parse(__userSettings);
 
 			// // if the setup was not already done
 			// if (userSettings.initialSetupCompleted === false) {
