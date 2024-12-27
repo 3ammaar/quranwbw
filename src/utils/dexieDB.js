@@ -17,16 +17,16 @@ db.version(1).stores({
     interval,
     last_updated,
     synced,
-    pocketBaseID,
+    pocketbase_id,
     [chapter+due],
     [due+chapter+verse],
     [chapter+verse],
     [chapter+verse+due],
     [chapter+verse+interval]
   `,
-  userSettings: `name, value, value2, last_updated, synced`,
-  userVerseTranslationsSettings: `name, enabled, last_updated, synced`,
-  userBookmarks: `[chapter+verse], enabled, last_updated, synced`,
-  userNotes: `[chapter+verse], value, last_updated, synced`,
-  favouriteChapters: `[chapter+verse], enabled, last_updated, synced`
+  userSetting: `name, value, value2, last_updated, synced`,
+  userVerseTranslationsSetting: `name, enabled, last_updated, synced`,
+  userBookmark: `[chapter+verse], enabled, last_updated, synced, pocketbase_id`,
+  userNote: `[chapter+verse], value, last_updated, synced, pocketbase_id`,
+  userFavouriteChapter: `[chapter+verse], enabled, last_updated, synced, pocketbase_id`
 });

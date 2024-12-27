@@ -15,58 +15,58 @@ async function moveUserSettingsFromLocalStorageToDB() {
 
 	// Display settings
 	if (userSettings.displaySettings) {
-		if (userSettings.displaySettings.websiteTheme != null) await db.userSettings.put(
+		if (userSettings.displaySettings.websiteTheme != null) await db.userSetting.put(
 			{name: "displaySettings.websiteTheme", value: userSettings.displaySettings.websiteTheme, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.displayType != null) await db.userSettings.put(
+		if (userSettings.displaySettings.displayType != null) await db.userSetting.put(
 			{name: "displaySettings.displayType", value: userSettings.displaySettings.displayType, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.fontType != null) await db.userSettings.put(
+		if (userSettings.displaySettings.fontType != null) await db.userSetting.put(
 			{name: "displaySettings.fontType", value: userSettings.displaySettings.fontType, last_updated: now, synced: 0}
 		);
 		
-		if (userSettings.displaySettings.wordTranslationEnabled != null) await db.userSettings.put(
+		if (userSettings.displaySettings.wordTranslationEnabled != null) await db.userSetting.put(
 			{name: "displaySettings.wordTranslationEnabled", value: userSettings.displaySettings.wordTranslationEnabled, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.wordTransliterationEnabled != null) await db.userSettings.put(
+		if (userSettings.displaySettings.wordTransliterationEnabled != null) await db.userSetting.put(
 			{name: "displaySettings.wordTransliterationEnabled", value: userSettings.displaySettings.wordTransliterationEnabled, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.wordTooltip != null) await db.userSettings.put(
+		if (userSettings.displaySettings.wordTooltip != null) await db.userSetting.put(
 			{name: "displaySettings.wordTooltip", value: userSettings.displaySettings.wordTooltip, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.autoScrollSpeed != null) await db.userSettings.put(
+		if (userSettings.displaySettings.autoScrollSpeed != null) await db.userSetting.put(
 			{name: "displaySettings.autoScrollSpeed", value: userSettings.displaySettings.autoScrollSpeed, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.wakeLockEnabled != null) await db.userSettings.put(
+		if (userSettings.displaySettings.wakeLockEnabled != null) await db.userSetting.put(
 			{name: "displaySettings.wakeLockEnabled", value: userSettings.displaySettings.wakeLockEnabled, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.englishTerminology != null) await db.userSettings.put(
+		if (userSettings.displaySettings.englishTerminology != null) await db.userSetting.put(
 			{name: "displaySettings.englishTerminology", value: userSettings.displaySettings.englishTerminology, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.displaySettings.hideNonDuaPart != null) await db.userSettings.put(
+		if (userSettings.displaySettings.hideNonDuaPart != null) await db.userSetting.put(
 			{name: "displaySettings.hideNonDuaPart", value: userSettings.displaySettings.hideNonDuaPart, last_updated: now, synced: 0}
 		);
 
 		// Font size settings (child of display settings)
 		if (!userSettings.displaySettings.fontSizes) {
 
-			if (userSettings.displaySettings.fontSizes.arabicText != null) await db.userSettings.put(
+			if (userSettings.displaySettings.fontSizes.arabicText != null) await db.userSetting.put(
 				{name: "displaySettings.fontSizes.arabicText", value: userSettings.displaySettings.fontSizes.arabicText, last_updated: now, synced: 0}
 			);
 
-			if (userSettings.displaySettings.fontSizes.wordTranslationText != null) await db.userSettings.put(
+			if (userSettings.displaySettings.fontSizes.wordTranslationText != null) await db.userSetting.put(
 				{name: "displaySettings.fontSizes.wordTranslationText", value: userSettings.displaySettings.fontSizes.wordTranslationText, last_updated: now, synced: 0}
 			);
 
-			if (userSettings.displaySettings.fontSizes.verseTranslationText != null) await db.userSettings.put(
+			if (userSettings.displaySettings.fontSizes.verseTranslationText != null) await db.userSetting.put(
 				{name: "displaySettings.fontSizes.verseTranslationText", value: userSettings.displaySettings.fontSizes.verseTranslationText, last_updated: now, synced: 0}
 			);
 		}
@@ -74,68 +74,68 @@ async function moveUserSettingsFromLocalStorageToDB() {
 
 	// Translation settings
 	if (userSettings.translations) {
-		if (userSettings.translations.word != null) await db.userSettings.put(
+		if (userSettings.translations.word != null) await db.userSetting.put(
 			{name: "translations.word", value: userSettings.translations.word, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.translations.verse_v1 != null) await db.userVerseTranslationsSettings.bulkPut(
+		if (userSettings.translations.verse_v1 != null) await db.userVerseTranslationsSetting.bulkPut(
 			userSettings.translations.verse_v1
 				.map((translation) => ({name: translation, enabled: 1, last_updated: now, synced: 0}))
 		);
 
-		if (userSettings.translations.tafsir != null) await db.userSettings.put(
+		if (userSettings.translations.tafsir != null) await db.userSetting.put(
 			{name: "translations.tafsir", value: userSettings.translations.tafsir, last_updated: now, synced: 0}
 		);
 	}
 
 	// Transliteration settings
 	if (userSettings.transliteration) {
-		if (userSettings.transliteration.word != null) await db.userSettings.put(
+		if (userSettings.transliteration.word != null) await db.userSetting.put(
 			{name: "transliteration.word", value: userSettings.transliteration.word, last_updated: now, synced: 0}
 		);
 	}
 
 	// Audio settings
 	if (userSettings.audioSettings) {
-		if (userSettings.audioSettings.reciter != null) await db.userSettings.put(
+		if (userSettings.audioSettings.reciter != null) await db.userSetting.put(
 			{name: "audioSettings.reciter", value: userSettings.audioSettings.reciter, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.audioSettings.translationReciter != null) await db.userSettings.put(
+		if (userSettings.audioSettings.translationReciter != null) await db.userSetting.put(
 			{name: "audioSettings.translationReciter", value: userSettings.audioSettings.translationReciter, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.audioSettings.playbackSpeed != null) await db.userSettings.put(
+		if (userSettings.audioSettings.playbackSpeed != null) await db.userSetting.put(
 			{name: "audioSettings.playbackSpeed", value: userSettings.audioSettings.playbackSpeed, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.audioSettings.playTranslation != null) await db.userSettings.put(
+		if (userSettings.audioSettings.playTranslation != null) await db.userSetting.put(
 			{name: "audioSettings.playTranslation", value: userSettings.audioSettings.playTranslation, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.audioSettings.versePlayButton != null) await db.userSettings.put(
+		if (userSettings.audioSettings.versePlayButton != null) await db.userSetting.put(
 			{name: "audioSettings.versePlayButton", value: userSettings.audioSettings.versePlayButton, last_updated: now, synced: 0}
 		);
 	}
 
 	// Quiz settings
 	if (userSettings.quiz) {
-		if (userSettings.quiz.correctAnswers != null) await db.userSettings.put(
+		if (userSettings.quiz.correctAnswers != null) await db.userSetting.put(
 			{name: "quiz.correctAnswers", value: userSettings.quiz.correctAnswers, last_updated: now, synced: 0}
 		);
 
-		if (userSettings.quiz.wrongAnswers != null) await db.userSettings.put(
+		if (userSettings.quiz.wrongAnswers != null) await db.userSetting.put(
 			{name: "quiz.wrongAnswers", value: userSettings.quiz.wrongAnswers, last_updated: now, synced: 0}
 		);
 	}
 
 	// Last read
-	if (userSettings.lastRead != null && userSettings.lastRead.key != null) await db.userSettings.put(
+	if (userSettings.lastRead != null && userSettings.lastRead.key != null) await db.userSetting.put(
 		{name: "lastRead", value: userSettings.lastRead.key, value2: userSettings.lastRead.page, last_updated: now, synced: 0}
 	);
 
 	// User bookmarks
-	if (userSettings.userBookmarks != null) await db.userBookmarks.bulkPut(
+	if (userSettings.userBookmarks != null) await db.userBookmark.bulkPut(
 		userSettings.userBookmarks
 			.map((verseKey) => ({
 				chapter: Number(verseKey.split(":")[0]), 
@@ -147,7 +147,7 @@ async function moveUserSettingsFromLocalStorageToDB() {
 	);
 
 	// User notes
-	if (userSettings.userNotes != null) await db.userNotes.bulkPut(
+	if (userSettings.userNotes != null) await db.userNote.bulkPut(
 		Object.entries(userSettings.userNotes)
 			.map(([verseKey, note]) => ({
 				chapter: Number(verseKey.split(":")[0]), 
@@ -159,7 +159,7 @@ async function moveUserSettingsFromLocalStorageToDB() {
 	);
 
 	// Favourite chapters
-	if (userSettings.favouriteChapters != null) await db.favouriteChapters.bulkPut(
+	if (userSettings.favouriteChapters != null) await db.userFavouriteChapter.bulkPut(
 		userSettings.favouriteChapters
 			.map((verseKey) => ({
 				chapter: Number(verseKey.split(":")[0]), 
@@ -171,18 +171,18 @@ async function moveUserSettingsFromLocalStorageToDB() {
 	);
 
 	// Initial setup
-	if (userSettings.initialSetupCompleted != null) await db.userSettings.put(
+	if (userSettings.initialSetupCompleted != null) await db.userSetting.put(
 		{name: "initialSetupCompleted", value: userSettings.initialSetupCompleted, last_updated: now, synced: 0}
 	);
 
 	// Chapter number
-	if (userSettings.chapter != null) await db.userSettings.put(
+	if (userSettings.chapter != null) await db.userSetting.put(
 		{name: "chapter", value: userSettings.chapter, last_updated: now, synced: 0}
 	);
 
 	// One-time modals (is shown?)
 	if (!userSettings.oneTimeModals) {
-		if (userSettings.oneTimeModals.changelogModal != null) await db.userSettings.put(
+		if (userSettings.oneTimeModals.changelogModal != null) await db.userSetting.put(
 			{name: "oneTimeModals.changelogModal", value: userSettings.oneTimeModals.changelogModal, last_updated: now, synced: 0}
 		);
 	}
@@ -195,7 +195,7 @@ export async function getUserSettingsOrDefaultFromDB() {
 	let arabicTextSize = 'text-2xl';
 
 	let dbUserSettings = {};
-	await db.userSettings.each(row => {
+	await db.userSetting.each(row => {
 		if (row.value2 == null) dbUserSettings[row.name] = row.value
 		else dbUserSettings[row.name] = {value: row.value, value2: row.value2}
 	});
@@ -231,7 +231,7 @@ export async function getUserSettingsOrDefaultFromDB() {
 
 	userSettings.translations.word = dbUserSettings["translations.word"] ?? 1; // English
 
-	const enabledDBTranslations = await db.userVerseTranslationsSettings.where("enabled").equals(1).primaryKeys();
+	const enabledDBTranslations = await db.userVerseTranslationsSetting.where("enabled").equals(1).primaryKeys();
 	userSettings.translations.verse_v1 = enabledDBTranslations.length ? enabledDBTranslations : [1, 131]; // Transliteration, The Clear Quran
 
 	userSettings.translations.tafsir = dbUserSettings["translations.tafsir"] ?? 30; // Tafsir Ibn Kathir
@@ -261,13 +261,13 @@ export async function getUserSettingsOrDefaultFromDB() {
 	userSettings.lastRead = lastRead ? {key: lastRead?.value, page: lastRead?.value2} : {};
 
 	// User bookmarks
-	const enabledDBBookmarks = (await db.userBookmarks.where("enabled").equals(1).primaryKeys())
+	const enabledDBBookmarks = (await db.userBookmark.where("enabled").equals(1).primaryKeys())
 		.map(bookmark => bookmark[0]+":"+bookmark[1]);
 	userSettings.userBookmarks = enabledDBBookmarks.length ? enabledDBBookmarks : [];
 
 	// User notes
 	const enabledDBNotes = {};
-	(await db.userNotes.where("value").notEqual("").toArray()).forEach((element) => {
+	(await db.userNote.where("value").notEqual("").toArray()).forEach((element) => {
 		const verseKey = element.chapter+":"+element.verse;
 		enabledDBNotes[verseKey] = {
 			note: element.value,
@@ -277,7 +277,7 @@ export async function getUserSettingsOrDefaultFromDB() {
 	userSettings.userNotes = enabledDBNotes;
 
 	// Favourite chapters
-	const enabledFavourites = (await db.favouriteChapters.where("enabled").equals(1).primaryKeys())
+	const enabledFavourites = (await db.userFavouriteChapter.where("enabled").equals(1).primaryKeys())
 		.map(favourite => favourite[0]+":"+favourite[1]);;
 	userSettings.favouriteChapters = enabledFavourites.length ? enabledFavourites : [1, 5, 18];
 

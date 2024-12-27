@@ -16,9 +16,7 @@ export function dbSubscribe() {
 
   const wordHifdhCardUpSync = liveQuery(() => db.wordHifdhCard.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
-      if (!pb.authStore.isValid) return;
-
-      if (!result?.length) return;
+      if (!pb.authStore.isValid || !result?.length) return;
 
       const batch = pb.createBatch();
       for (const record of result) {
@@ -37,13 +35,85 @@ export function dbSubscribe() {
           "stability": record.stability,
           "state": record.state,
           "last_updated": record.last_updated,
-          ...(record.pocketBaseID && {id: record.pocketBaseID})
+          ...(record.pocketbase_id && {id: record.pocketbase_id})
         });
       }
 
       batch.send().then(result => result.forEach(record => {
         db.wordHifdhCard.where("[chapter+verse+word]").equals([record.body.chapter, record.body.verse, record.body.word])
-          .modify({synced: 1, pocketBaseID: record.body.id}).catch(error => console.log(error));
+          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+      })).catch(error => console.log(error));
+    },
+    error: error => console.log(error)
+  });
+
+  const userBookmarkUpSync = liveQuery(() => db.userBookmark.where("synced").notEqual(1).toArray()).subscribe({
+    next: result => {
+      if (!pb.authStore.isValid || !result?.length) return;
+
+      const batch = pb.createBatch();
+      for (const record of result) {
+        batch.collection("userBookmark").upsert({
+          "userID": pb.authStore.record.id,
+          "chapter": record.chapter,
+          "verse": record.verse,
+          "enabled": !!record.enabled,
+          "last_updated": record.last_updated,
+          ...(record.pocketbase_id && {id: record.pocketbase_id})
+        });
+      }
+
+      batch.send().then(result => result.forEach(record => {
+        db.userBookmark.where("[chapter+verse]").equals([record.body.chapter, record.body.verse])
+          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+      })).catch(error => console.log(error));
+    },
+    error: error => console.log(error)
+  });
+
+  const userNoteUpSync = liveQuery(() => db.userNote.where("synced").notEqual(1).toArray()).subscribe({
+    next: result => {
+      if (!pb.authStore.isValid || !result?.length) return;
+
+      const batch = pb.createBatch();
+      for (const record of result) {
+        batch.collection("userNote").upsert({
+          "userID": pb.authStore.record.id,
+          "chapter": record.chapter,
+          "verse": record.verse,
+          "value": record.value,
+          "last_updated": record.last_updated,
+          ...(record.pocketbase_id && {id: record.pocketbase_id})
+        });
+      }
+
+      batch.send().then(result => result.forEach(record => {
+        db.userNote.where("[chapter+verse]").equals([record.body.chapter, record.body.verse])
+          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+      })).catch(error => console.log(error));
+    },
+    error: error => console.log(error)
+  });
+
+  const userFavouriteChapterUpSync = liveQuery(() => db.userFavouriteChapterUpSync.where("synced").notEqual(1).toArray()).subscribe({
+    next: result => {
+      if (!pb.authStore.isValid || !result?.length) return;
+
+      const batch = pb.createBatch();
+      for (const record of result) {
+        batch.collection("userFavouriteChapter").upsert({
+          "userID": pb.authStore.record.id,
+          "chapter": record.chapter,
+          "verse": record.verse,
+          "enabled": !!record.enabled,
+          "last_updated": record.last_updated,
+          ...(record.pocketbase_id && {id: record.pocketbase_id})
+        });
+      }
+
+      batch.send().then(result => result.forEach(record => {
+        db.userFavouriteChapter.where("[chapter+verse]").equals([record.body.chapter, record.body.verse])
+          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
       })).catch(error => console.log(error));
     },
     error: error => console.log(error)
@@ -52,6 +122,9 @@ export function dbSubscribe() {
   window.onbeforeunload = () => {
     pb.collection("users").unsubscribe();
     wordHifdhCardUpSync.unsubscribe();
+    userBookmarkUpSync.unsubscribe();
+    userNoteUpSync.unsubscribe();
+    userFavouriteChapterUpSync.unsubscribe();
   };
 }
 
@@ -89,9 +162,75 @@ export async function downSyncFromDate(date) {
       state: record.state,
       last_review: record.last_review ? toJSDate(record.last_review) : null,
       interval: record.interval,
-      last_updated: record.last_updated,
+      last_updated: toJSDate(record.last_updated),
       synced: 1,
-      pocketBaseID: record.id
+      pocketbase_id: record.id
+    }).catch(error => {
+      console.log(error);
+      success = false;
+    });
+  }
+
+  const userBookmarkRecords = await pb.collection("userBookmark").getFullList({
+    filter: `last_updated > "${toPBDate(date)}"`
+  }).catch(error => {
+    console.log(error);
+    success = false;
+    return [];
+  });
+
+  for (const record of userBookmarkRecords) {
+    await db.userBookmark.put({
+      chapter: record.chapter,
+      verse: record.verse,
+      enabled: record.enabled ? 1 : 0,
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
+    }).catch(error => {
+      console.log(error);
+      success = false;
+    });
+  }
+
+  const userNoteRecords = await pb.collection("userNote").getFullList({
+    filter: `last_updated > "${toPBDate(date)}"`
+  }).catch(error => {
+    console.log(error);
+    success = false;
+    return [];
+  });
+
+  for (const record of userNoteRecords) {
+    await db.userNote.put({
+      chapter: record.chapter,
+      verse: record.verse,
+      value: record.value,
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
+    }).catch(error => {
+      console.log(error);
+      success = false;
+    });
+  }
+
+  const userFavouriteChapterRecords = await pb.collection("userFavouriteChapter").getFullList({
+    filter: `last_updated > "${toPBDate(date)}"`
+  }).catch(error => {
+    console.log(error);
+    success = false;
+    return [];
+  });
+
+  for (const record of userFavouriteChapterRecords) {
+    await db.userFavouriteChapter.put({
+      chapter: record.chapter,
+      verse: record.verse,
+      enabled: record.enabled ? 1 : 0,
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
     }).catch(error => {
       console.log(error);
       success = false;
