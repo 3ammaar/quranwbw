@@ -17,6 +17,7 @@ db.version(1).stores({
     interval,
     last_updated,
     synced,
+    pocketBaseID,
     [chapter+due],
     [due+chapter+verse],
     [chapter+verse],

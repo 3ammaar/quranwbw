@@ -1,26 +1,12 @@
 import { db } from '$utils/dexieDB';
-import { initialiseUserSettingsStores } from './utils/stores';
-import { pb } from '$utils/pocketBaseDB';
-import { __pbAuth } from '$utils/stores';
+import { initialiseUserSettingsStores } from '$utils/stores';
+import { dbSubscribe, startDownSyncInterval } from '$utils/dbHooks';
 
 (async function () {
 	await setUserSettings();
-	authSubscribe();
+	dbSubscribe();
+	startDownSyncInterval();
 })();
-
-function authSubscribe() {
-	pb.collection("users").subscribe("*", () => {
-		if (pb.authStore.isValid) pb.collection("users").authRefresh()
-			.catch(error => {
-				if (error.status == 401) {
-					pb.authStore.clear();
-				}
-			});
-		__pbAuth.set(pb.authStore);
-	});
-
-	window.onbeforeunload = () => {pb.collection("users").unsubscribe()};
-}
 
 async function moveUserSettingsFromLocalStorageToDB() {
 	let userSettings = JSON.parse(localStorage.getItem('userSettings'));
@@ -30,58 +16,58 @@ async function moveUserSettingsFromLocalStorageToDB() {
 	// Display settings
 	if (userSettings.displaySettings) {
 		if (userSettings.displaySettings.websiteTheme != null) await db.userSettings.put(
-			{name: "displaySettings.websiteTheme", value: userSettings.displaySettings.websiteTheme, last_updated: now}
+			{name: "displaySettings.websiteTheme", value: userSettings.displaySettings.websiteTheme, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.displayType != null) await db.userSettings.put(
-			{name: "displaySettings.displayType", value: userSettings.displaySettings.displayType, last_updated: now}
+			{name: "displaySettings.displayType", value: userSettings.displaySettings.displayType, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.fontType != null) await db.userSettings.put(
-			{name: "displaySettings.fontType", value: userSettings.displaySettings.fontType, last_updated: now}
+			{name: "displaySettings.fontType", value: userSettings.displaySettings.fontType, last_updated: now, synced: 0}
 		);
 		
 		if (userSettings.displaySettings.wordTranslationEnabled != null) await db.userSettings.put(
-			{name: "displaySettings.wordTranslationEnabled", value: userSettings.displaySettings.wordTranslationEnabled, last_updated: now}
+			{name: "displaySettings.wordTranslationEnabled", value: userSettings.displaySettings.wordTranslationEnabled, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.wordTransliterationEnabled != null) await db.userSettings.put(
-			{name: "displaySettings.wordTransliterationEnabled", value: userSettings.displaySettings.wordTransliterationEnabled, last_updated: now}
+			{name: "displaySettings.wordTransliterationEnabled", value: userSettings.displaySettings.wordTransliterationEnabled, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.wordTooltip != null) await db.userSettings.put(
-			{name: "displaySettings.wordTooltip", value: userSettings.displaySettings.wordTooltip, last_updated: now}
+			{name: "displaySettings.wordTooltip", value: userSettings.displaySettings.wordTooltip, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.autoScrollSpeed != null) await db.userSettings.put(
-			{name: "displaySettings.autoScrollSpeed", value: userSettings.displaySettings.autoScrollSpeed, last_updated: now}
+			{name: "displaySettings.autoScrollSpeed", value: userSettings.displaySettings.autoScrollSpeed, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.wakeLockEnabled != null) await db.userSettings.put(
-			{name: "displaySettings.wakeLockEnabled", value: userSettings.displaySettings.wakeLockEnabled, last_updated: now}
+			{name: "displaySettings.wakeLockEnabled", value: userSettings.displaySettings.wakeLockEnabled, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.englishTerminology != null) await db.userSettings.put(
-			{name: "displaySettings.englishTerminology", value: userSettings.displaySettings.englishTerminology, last_updated: now}
+			{name: "displaySettings.englishTerminology", value: userSettings.displaySettings.englishTerminology, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.displaySettings.hideNonDuaPart != null) await db.userSettings.put(
-			{name: "displaySettings.hideNonDuaPart", value: userSettings.displaySettings.hideNonDuaPart, last_updated: now}
+			{name: "displaySettings.hideNonDuaPart", value: userSettings.displaySettings.hideNonDuaPart, last_updated: now, synced: 0}
 		);
 
 		// Font size settings (child of display settings)
 		if (!userSettings.displaySettings.fontSizes) {
 
 			if (userSettings.displaySettings.fontSizes.arabicText != null) await db.userSettings.put(
-				{name: "displaySettings.fontSizes.arabicText", value: userSettings.displaySettings.fontSizes.arabicText, last_updated: now}
+				{name: "displaySettings.fontSizes.arabicText", value: userSettings.displaySettings.fontSizes.arabicText, last_updated: now, synced: 0}
 			);
 
 			if (userSettings.displaySettings.fontSizes.wordTranslationText != null) await db.userSettings.put(
-				{name: "displaySettings.fontSizes.wordTranslationText", value: userSettings.displaySettings.fontSizes.wordTranslationText, last_updated: now}
+				{name: "displaySettings.fontSizes.wordTranslationText", value: userSettings.displaySettings.fontSizes.wordTranslationText, last_updated: now, synced: 0}
 			);
 
 			if (userSettings.displaySettings.fontSizes.verseTranslationText != null) await db.userSettings.put(
-				{name: "displaySettings.fontSizes.verseTranslationText", value: userSettings.displaySettings.fontSizes.verseTranslationText, last_updated: now}
+				{name: "displaySettings.fontSizes.verseTranslationText", value: userSettings.displaySettings.fontSizes.verseTranslationText, last_updated: now, synced: 0}
 			);
 		}
 	}
@@ -89,63 +75,63 @@ async function moveUserSettingsFromLocalStorageToDB() {
 	// Translation settings
 	if (userSettings.translations) {
 		if (userSettings.translations.word != null) await db.userSettings.put(
-			{name: "translations.word", value: userSettings.translations.word, last_updated: now}
+			{name: "translations.word", value: userSettings.translations.word, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.translations.verse_v1 != null) await db.userVerseTranslationsSettings.bulkPut(
 			userSettings.translations.verse_v1
-				.map((translation) => ({name: translation, enabled: 1, last_updated: now}))
+				.map((translation) => ({name: translation, enabled: 1, last_updated: now, synced: 0}))
 		);
 
 		if (userSettings.translations.tafsir != null) await db.userSettings.put(
-			{name: "translations.tafsir", value: userSettings.translations.tafsir, last_updated: now}
+			{name: "translations.tafsir", value: userSettings.translations.tafsir, last_updated: now, synced: 0}
 		);
 	}
 
 	// Transliteration settings
 	if (userSettings.transliteration) {
 		if (userSettings.transliteration.word != null) await db.userSettings.put(
-			{name: "transliteration.word", value: userSettings.transliteration.word, last_updated: now}
+			{name: "transliteration.word", value: userSettings.transliteration.word, last_updated: now, synced: 0}
 		);
 	}
 
 	// Audio settings
 	if (userSettings.audioSettings) {
 		if (userSettings.audioSettings.reciter != null) await db.userSettings.put(
-			{name: "audioSettings.reciter", value: userSettings.audioSettings.reciter, last_updated: now}
+			{name: "audioSettings.reciter", value: userSettings.audioSettings.reciter, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.audioSettings.translationReciter != null) await db.userSettings.put(
-			{name: "audioSettings.translationReciter", value: userSettings.audioSettings.translationReciter, last_updated: now}
+			{name: "audioSettings.translationReciter", value: userSettings.audioSettings.translationReciter, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.audioSettings.playbackSpeed != null) await db.userSettings.put(
-			{name: "audioSettings.playbackSpeed", value: userSettings.audioSettings.playbackSpeed, last_updated: now}
+			{name: "audioSettings.playbackSpeed", value: userSettings.audioSettings.playbackSpeed, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.audioSettings.playTranslation != null) await db.userSettings.put(
-			{name: "audioSettings.playTranslation", value: userSettings.audioSettings.playTranslation, last_updated: now}
+			{name: "audioSettings.playTranslation", value: userSettings.audioSettings.playTranslation, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.audioSettings.versePlayButton != null) await db.userSettings.put(
-			{name: "audioSettings.versePlayButton", value: userSettings.audioSettings.versePlayButton, last_updated: now}
+			{name: "audioSettings.versePlayButton", value: userSettings.audioSettings.versePlayButton, last_updated: now, synced: 0}
 		);
 	}
 
 	// Quiz settings
 	if (userSettings.quiz) {
 		if (userSettings.quiz.correctAnswers != null) await db.userSettings.put(
-			{name: "quiz.correctAnswers", value: userSettings.quiz.correctAnswers, last_updated: now}
+			{name: "quiz.correctAnswers", value: userSettings.quiz.correctAnswers, last_updated: now, synced: 0}
 		);
 
 		if (userSettings.quiz.wrongAnswers != null) await db.userSettings.put(
-			{name: "quiz.wrongAnswers", value: userSettings.quiz.wrongAnswers, last_updated: now}
+			{name: "quiz.wrongAnswers", value: userSettings.quiz.wrongAnswers, last_updated: now, synced: 0}
 		);
 	}
 
 	// Last read
 	if (userSettings.lastRead != null && userSettings.lastRead.key != null) await db.userSettings.put(
-		{name: "lastRead", value: userSettings.lastRead.key, value2: userSettings.lastRead.page, last_updated: now}
+		{name: "lastRead", value: userSettings.lastRead.key, value2: userSettings.lastRead.page, last_updated: now, synced: 0}
 	);
 
 	// User bookmarks
@@ -155,7 +141,8 @@ async function moveUserSettingsFromLocalStorageToDB() {
 				chapter: Number(verseKey.split(":")[0]), 
 				verse: Number(verseKey.split(":")[1]),
 				enabled: 1, 
-				last_updated: now
+				last_updated: now,
+				synced: 0
 			}))
 	);
 
@@ -166,7 +153,8 @@ async function moveUserSettingsFromLocalStorageToDB() {
 				chapter: Number(verseKey.split(":")[0]), 
 				verse: Number(verseKey.split(":")[1]),
 				value: note.note,
-				last_updated: note.modified_at
+				last_updated: note.modified_at,
+				synced: 0
 			}))
 	);
 
@@ -177,24 +165,25 @@ async function moveUserSettingsFromLocalStorageToDB() {
 				chapter: Number(verseKey.split(":")[0]), 
 				verse: Number(verseKey.split(":")[1]),
 				enabled: 1,
-				last_updated: now
+				last_updated: now,
+				synced: 0
 			}))
 	);
 
 	// Initial setup
 	if (userSettings.initialSetupCompleted != null) await db.userSettings.put(
-		{name: "initialSetupCompleted", value: userSettings.initialSetupCompleted, last_updated: now}
+		{name: "initialSetupCompleted", value: userSettings.initialSetupCompleted, last_updated: now, synced: 0}
 	);
 
 	// Chapter number
 	if (userSettings.chapter != null) await db.userSettings.put(
-		{name: "chapter", value: userSettings.chapter, last_updated: now}
+		{name: "chapter", value: userSettings.chapter, last_updated: now, synced: 0}
 	);
 
 	// One-time modals (is shown?)
 	if (!userSettings.oneTimeModals) {
 		if (userSettings.oneTimeModals.changelogModal != null) await db.userSettings.put(
-			{name: "oneTimeModals.changelogModal", value: userSettings.oneTimeModals.changelogModal, last_updated: now}
+			{name: "oneTimeModals.changelogModal", value: userSettings.oneTimeModals.changelogModal, last_updated: now, synced: 0}
 		);
 	}
 	

@@ -41,7 +41,7 @@ export async function rescheduleVerse(chapter, verse, correctWords, totalWords) 
       }
       await db.wordHifdhCard.update(
         [chapter, verse, i], 
-        Object.assign({interval: newCard.due - newCard.last_review, last_updated: now, synced: false}, newCard));
+        Object.assign({interval: newCard.due - newCard.last_review, last_updated: now, synced: 0}, newCard));
     };
   }
   else {
@@ -49,7 +49,7 @@ export async function rescheduleVerse(chapter, verse, correctWords, totalWords) 
     for (let i = 0; i <= totalWords; i++) {
       newCard = createEmptyCard(firstReviewDate);
       await db.wordHifdhCard.add(Object.assign(
-        {chapter: chapter, verse: verse, word: i, interval: newCard.due - now, last_updated: now}, 
+        {chapter: chapter, verse: verse, word: i, interval: newCard.due - now, last_updated: now, synced: 0}, 
         newCard
       ));
     }

@@ -774,6 +774,234 @@ migrate((app) => {
         "duration": 259200
       },
       "viewRule": "id = @request.auth.id"
+    },
+    {
+      "createRule": "userID = @request.auth.id",
+      "deleteRule": "userID = @request.auth.id",
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "cascadeDelete": false,
+          "collectionId": "_pb_users_auth_",
+          "hidden": false,
+          "id": "relation1608019204",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "userID",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "hidden": false,
+          "id": "number4186027310",
+          "max": null,
+          "min": null,
+          "name": "chapter",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number3539461791",
+          "max": null,
+          "min": null,
+          "name": "verse",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number3287381265",
+          "max": null,
+          "min": null,
+          "name": "word",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number3144380399",
+          "max": null,
+          "min": null,
+          "name": "difficulty",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "date3742343818",
+          "max": "",
+          "min": "",
+          "name": "due",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "date"
+        },
+        {
+          "hidden": false,
+          "id": "number1203484174",
+          "max": null,
+          "min": null,
+          "name": "elapsed_days",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number2259220878",
+          "max": null,
+          "min": null,
+          "name": "lapses",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "date4081320732",
+          "max": "",
+          "min": "",
+          "name": "last_review",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "date"
+        },
+        {
+          "hidden": false,
+          "id": "number1214113712",
+          "max": null,
+          "min": null,
+          "name": "reps",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number606452559",
+          "max": null,
+          "min": null,
+          "name": "scheduled_days",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number2946385302",
+          "max": null,
+          "min": null,
+          "name": "stability",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number2744374011",
+          "max": null,
+          "min": null,
+          "name": "state",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number432467915",
+          "max": null,
+          "min": null,
+          "name": "interval",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "date2685905599",
+          "max": "",
+          "min": "",
+          "name": "last_updated",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "date"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_3935192847",
+      "indexes": [
+        "CREATE UNIQUE INDEX `wordHifdhCard_chapterVerseWord` ON `wordHifdhCard` (\n  `chapter`,\n  `verse`,\n  `word`\n)"
+      ],
+      "listRule": "userID = @request.auth.id",
+      "name": "wordHifdhCard",
+      "system": false,
+      "type": "base",
+      "updateRule": "userID = @request.auth.id && last_updated < @request.body.last_updated",
+      "viewRule": "userID = @request.auth.id"
     }
   ];
 
