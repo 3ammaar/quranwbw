@@ -4128,8 +4128,16 @@ svg {
     margin-right: -0.25rem;
   }
 
+  .md\:mr-2 {
+    margin-right: 0.5rem;
+  }
+
   .md\:mt-6 {
     margin-top: 1.5rem;
+  }
+
+  .md\:mb-0 {
+    margin-bottom: 0px;
   }
 
   .md\:block {
@@ -4195,6 +4203,10 @@ svg {
 
   .md\:grid-cols-6 {
     grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  
+  .md\:flex {
+    display: flex;
   }
 
   .md\:flex-row {
@@ -4271,6 +4283,10 @@ svg {
 
   .md\:text-left {
     text-align: left;
+  }
+
+  .md\:text-center {
+    text-align: center;
   }
 
   .md\:text-2xl {

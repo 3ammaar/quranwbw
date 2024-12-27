@@ -1,10 +1,26 @@
 import { db } from '$utils/dexieDB';
 import { initialiseUserSettingsStores } from './utils/stores';
+import { pb } from '$utils/pocketBaseDB';
+import { __pbAuth } from '$utils/stores';
 
-// Setting default user settings in localStorage
 (async function () {
 	await setUserSettings();
+	authSubscribe();
 })();
+
+function authSubscribe() {
+	pb.collection("users").subscribe("*", () => {
+		if (pb.authStore.isValid) pb.collection("users").authRefresh()
+			.catch(error => {
+				if (error.status == 401) {
+					pb.authStore.clear();
+				}
+			});
+		__pbAuth.set(pb.authStore);
+	});
+
+	window.onbeforeunload = () => {pb.collection("users").unsubscribe()};
+}
 
 async function moveUserSettingsFromLocalStorageToDB() {
 	let userSettings = JSON.parse(localStorage.getItem('userSettings'));

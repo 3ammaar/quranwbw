@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
+import { pb } from '$utils/pocketBaseDB'
 
 let __websiteOnline,
 	__currentPage,
@@ -65,7 +66,8 @@ let __websiteOnline,
 	__wordRoot,
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
-	__learnMode;
+	__learnMode,
+	__pbAuth;
 
 if (browser) {
 	
@@ -183,6 +185,9 @@ if (browser) {
 
 	// used to indicate whether to just review past cards or to also learn new cards, or neither
 	__learnMode = writable(null);
+
+	// PocketBase AuthStore
+	__pbAuth = writable(pb.authStore);
 }
 
 export function initialiseUserSettingsStores(userSettings) {
@@ -397,4 +402,5 @@ export {
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
 	__learnMode,
+	__pbAuth
 };
