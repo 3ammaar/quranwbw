@@ -5,7 +5,6 @@ export const db = new Dexie('quranwbw');
 db.version(1).stores({
   wordHifdhCard: `
     [chapter+verse+word],
-    last_updated,
     due,
     stability,
     difficulty,
@@ -16,15 +15,17 @@ db.version(1).stores({
     state,
     last_review,
     interval,
+    last_updated,
+    synced,
     [chapter+due],
     [due+chapter+verse],
     [chapter+verse],
     [chapter+verse+due],
     [chapter+verse+interval]
   `,
-  userSettings: `name, value, value2, last_updated`,
-  userVerseTranslationsSettings: `name, enabled, last_updated`,
-  userBookmarks: `verseKey, enabled, last_updated`,
-  userNotes: `verseKey, value, last_updated`,
-  favouriteChapters: `verseKey, enabled, last_updated`
+  userSettings: `name, value, value2, last_updated, synced`,
+  userVerseTranslationsSettings: `name, enabled, last_updated, synced`,
+  userBookmarks: `[chapter+verse], enabled, last_updated, synced`,
+  userNotes: `[chapter+verse], value, last_updated, synced`,
+  favouriteChapters: `[chapter+verse], enabled, last_updated, synced`
 });

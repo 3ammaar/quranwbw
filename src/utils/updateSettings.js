@@ -186,7 +186,12 @@ export function updateSettings(props) {
 				userBookmarks = key;
 				const now = new Date();
 				db.userBookmarks.clear().then(() => {
-					db.userBookmarks.bulkAdd(key.map(bookmark => ({verseKey: bookmark, enabled: 1, last_updated: now})));
+					db.userBookmarks.bulkAdd(key.map(bookmark => ({
+						chapter: Number(bookmark.split(":")[0]), 
+						verse: Number(bookmark.split(":")[1]),
+						enabled: 1, 
+						last_updated: now
+					})));
 				});
 			}
 
@@ -201,12 +206,20 @@ export function updateSettings(props) {
 				// if the bookmark (key) already exists, then remove it, else add it
 				else userBookmarks.includes(key) ? (userBookmarks = userBookmarks.filter((x) => x !== key)) : userBookmarks.push(key);
 
-				
-				
 				if (userBookmarks.includes(key)) {
-					// db.userBookmarks.put({verseKey: key, enabled: 1, last_updated: new Date()});
+					db.userBookmarks.put({
+						chapter: Number(key.split(":")[0]), 
+						verse: Number(key.split(":")[1]),
+						enabled: 1,
+						last_updated: new Date()
+					});
 				} else {
-					// db.userBookmarks.put({verseKey: key, enabled: 0, last_updated: new Date()});
+					db.userBookmarks.put({
+						chapter: Number(key.split(":")[0]), 
+						verse: Number(key.split(":")[1]),
+						enabled: 0,
+						last_updated: new Date()
+					});
 				}
 			}
 
@@ -227,10 +240,15 @@ export function updateSettings(props) {
 			// if override key was set, then just set the value key in storage
 			if (props.override) {
 				userNotes = notes_key;
-				db.userBookmarks.clear().then(() => {
-					db.userBookmarks.bulkAdd(
+				db.userNotes.clear().then(() => {
+					db.userNotes.bulkAdd(
 						Object.entries(notes_key).map(
-							([verseKey, note]) => ({verseKey: verseKey, value: note.note, last_updated: note.modified_at})
+							([verseKey, note]) => ({
+								chapter: Number(verseKey.split(":")[0]), 
+								verse: Number(verseKey.split(":")[1]),
+								value: note.note, 
+								last_updated: note.modified_at
+							})
 						)
 					);
 				});
@@ -249,7 +267,12 @@ export function updateSettings(props) {
 					if (Object.prototype.hasOwnProperty.call(userNotes, notes_key)) delete userNotes[notes_key];
 				}
 
-				db.userNotes.put({verseKey: notes_key, value: userNotes[notes_key]?.note ?? "", last_updated: now});
+				db.userNotes.put({
+					chapter: Number(notes_key.split(":")[0]), 
+					verse: Number(notes_key.split(":")[1]),
+					value: userNotes[notes_key]?.note ?? "",
+					last_updated: now
+				});
 			}
 
 			// update the notes

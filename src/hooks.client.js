@@ -151,19 +151,34 @@ async function moveUserSettingsFromLocalStorageToDB() {
 	// User bookmarks
 	if (userSettings.userBookmarks != null) await db.userBookmarks.bulkPut(
 		userSettings.userBookmarks
-			.map((verseKey) => ({verseKey: verseKey, enabled: 1, last_updated: now}))
+			.map((verseKey) => ({
+				chapter: Number(verseKey.split(":")[0]), 
+				verse: Number(verseKey.split(":")[1]),
+				enabled: 1, 
+				last_updated: now
+			}))
 	);
 
 	// User notes
 	if (userSettings.userNotes != null) await db.userNotes.bulkPut(
 		Object.entries(userSettings.userNotes)
-			.map(([verseKey, note]) => ({verseKey: verseKey, value: note.note, last_updated: note.modified_at}))
+			.map(([verseKey, note]) => ({
+				chapter: Number(verseKey.split(":")[0]), 
+				verse: Number(verseKey.split(":")[1]),
+				value: note.note,
+				last_updated: note.modified_at
+			}))
 	);
 
 	// Favourite chapters
 	if (userSettings.favouriteChapters != null) await db.favouriteChapters.bulkPut(
 		userSettings.favouriteChapters
-			.map((verseKey) => ({verseKey: verseKey, enabled: 1, last_updated: now}))
+			.map((verseKey) => ({
+				chapter: Number(verseKey.split(":")[0]), 
+				verse: Number(verseKey.split(":")[1]),
+				enabled: 1,
+				last_updated: now
+			}))
 	);
 
 	// Initial setup
@@ -257,13 +272,15 @@ export async function getUserSettingsOrDefaultFromDB() {
 	userSettings.lastRead = lastRead ? {key: lastRead?.value, page: lastRead?.value2} : {};
 
 	// User bookmarks
-	const enabledDBBookmarks = await db.userBookmarks.where("enabled").equals(1).primaryKeys();
+	const enabledDBBookmarks = (await db.userBookmarks.where("enabled").equals(1).primaryKeys())
+		.map(bookmark => bookmark[0]+":"+bookmark[1]);
 	userSettings.userBookmarks = enabledDBBookmarks.length ? enabledDBBookmarks : [];
 
 	// User notes
 	const enabledDBNotes = {};
 	(await db.userNotes.where("value").notEqual("").toArray()).forEach((element) => {
-		enabledDBNotes[element.verseKey] = {
+		const verseKey = element.chapter+":"+element.verse;
+		enabledDBNotes[verseKey] = {
 			note: element.value,
 			modified_at: new Date(element.last_updated).toISOString()
 		};
@@ -271,7 +288,8 @@ export async function getUserSettingsOrDefaultFromDB() {
 	userSettings.userNotes = enabledDBNotes;
 
 	// Favourite chapters
-	const enabledFavourites = await db.favouriteChapters.where("enabled").equals(1).primaryKeys();
+	const enabledFavourites = (await db.favouriteChapters.where("enabled").equals(1).primaryKeys())
+		.map(favourite => favourite[0]+":"+favourite[1]);;
 	userSettings.favouriteChapters = enabledFavourites.length ? enabledFavourites : [1, 5, 18];
 
 	// Initial setup

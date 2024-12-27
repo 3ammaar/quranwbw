@@ -41,7 +41,7 @@ export async function rescheduleVerse(chapter, verse, correctWords, totalWords) 
       }
       await db.wordHifdhCard.update(
         [chapter, verse, i], 
-        Object.assign({interval: newCard.due - newCard.last_review, last_updated: now}, newCard));
+        Object.assign({interval: newCard.due - newCard.last_review, last_updated: now, synced: false}, newCard));
     };
   }
   else {
