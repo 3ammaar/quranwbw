@@ -55,7 +55,7 @@
                 <h3>An error has occurred. The email change link may be invalid. Please try again.</h3>
                 {:else}
                 {#if !successMessage}
-                <form>
+                <form on:submit|preventDefault={() => {}}>
                     <h3>Re-enter your password to confirm your email change to {newEmail}</h3>
                     <div class="pt-1 pb-1 mt-2">
                         <Input id="passwordInput" type="password" bind:value={password} placeholder={"Password"} size="md" class="bg-transparent rounded-3xl pl-10 px-8 {window.theme('placeholder')}">
@@ -66,6 +66,7 @@
                         <button
                             on:click={() => changeEmail()}
                             class="w-full {buttonClasses}}"
+                            type="submit"
                         >Confirm email change</button>
                     </div>
                 </form>

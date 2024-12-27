@@ -231,30 +231,31 @@
                     >Change email address</button>
                 </div>
                 {:else}
-                <div class="mt-8 inline md:flex md:text-center items-center flex-wrap">
-                    <div class="md:text-center flex-shrink-0 pr-6 mb-2 md:mb-0">
-                        Change email:
-                    </div>
-                    <div class="flex-shrink-0 grow md:mr-2 mb-2 md:mb-0">
-                        <form>
+                <form on:submit|preventDefault={() => {}}>
+                    <div class="mt-8 inline md:flex md:text-center items-center flex-wrap">
+                        <div class="md:text-center flex-shrink-0 pr-6 mb-2 md:mb-0">
+                            Change email:
+                        </div>
+                        <div class="flex-shrink-0 grow md:mr-2 mb-2 md:mb-0">
                             <Input id="emailInput" type="email" bind:value={email} placeholder={"Email"} size="md" class="bg-transparent rounded-3xl {window.theme('placeholder')}">
                                 <Email slot="left" size={7} classes="pl-2 pt-1 mr-3 {email.length > 0 && 'hidden'}" />
                             </Input>
-                        </form>
                     </div>
-                    <div class="flex flex-row">
-                        <button
-                            on:click={() => changeEmail()}
-                            disabled={loading}
-                            class="{buttonClasses} grow"
-                        >Submit</button>
-                        <button
-                            on:click={() => isChangingEmail = !isChangingEmail}
-                            disabled={loading}
-                            class="{buttonClasses} ml-2 grow"
-                        >Cancel</button>
+                        <div class="flex flex-row">
+                            <button
+                                on:click={() => changeEmail()}
+                                disabled={loading}
+                                class="{buttonClasses} grow"
+                                type="submit"
+                            >Submit</button>
+                            <button
+                                on:click={() => isChangingEmail = !isChangingEmail}
+                                disabled={loading}
+                                class="{buttonClasses} ml-2 grow"
+                            >Cancel</button>
+                        </div>
                     </div>
-                </div>
+                </form>
                 {/if}
 
                 {#if !isChangingEmail}
@@ -274,7 +275,7 @@
             </div>
             {:else}
             <div class="w-full">
-                <form>
+                <form on:submit|preventDefault={() => {}}>
                     <div class="pt-1 pb-1 mt-4">
                         <Input id="emailInput" type="email" bind:value={email} placeholder={"Email"} size="md" class="bg-transparent rounded-3xl pl-10 px-8 {window.theme('placeholder')}">
                             <Email slot="left" size={7} classes="pl-2 pt-1 mr-3 {email.length > 0 && 'hidden'}" />
@@ -296,6 +297,7 @@
                         <button
                             on:click={() => isSigningUp ? signUpWithEmail() : signInWithEmail()}
                             class="w-full mr-2 {buttonClasses}"
+                            type="submit"
                         >{isSigningUp ? "Sign up" : "Sign in"}</button>
                     </div>
                 </form>

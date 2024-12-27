@@ -60,7 +60,7 @@
         <div>
             <div class="w-full">
                 {#if !successMessage}
-                <form on:submit|preventDefault={() => resetPassword()}>
+                <form on:submit|preventDefault={() => {}}>
                     <div class="pt-1 pb-1">
                         <Input id="passwordInput" type="password" bind:value={password} placeholder={"Password"} size="md" class="bg-transparent rounded-3xl pl-10 px-8 {window.theme('placeholder')}">
                             <Password slot="left" size={7} classes="pl-2 pt-1 mr-3 {password.length > 0 && 'hidden'}" />
@@ -75,6 +75,7 @@
                         <button
                             on:click={() => resetPassword()}
                             class="w-full {buttonClasses}}"
+                            type="submit"
                         >Reset Password</button>
                     </div>
                 </form>
