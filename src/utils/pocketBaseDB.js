@@ -1,7 +1,8 @@
 import PocketBase from 'pocketbase';
 import { __pbAuth } from '$utils/stores';
+import { pocketBaseEndpoint } from '$data/websiteSettings';
 
-export const pb = new PocketBase('http://127.0.0.1:8090');
+export const pb = new PocketBase(pocketBaseEndpoint);
 
 pb.authStore.onChange(() => __pbAuth.set(pb.authStore));
 

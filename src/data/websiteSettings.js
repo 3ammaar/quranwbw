@@ -24,3 +24,5 @@ export const mushafFontVersion = 5;
 export const errorLoadingDataMessage = 'Sorry, there was an error while loading the data. Please refresh the page and try again.';
 
 export const splitDelimiter = '||';
+
+export const pocketBaseEndpoint = 'http://127.0.0.1:8090'

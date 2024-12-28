@@ -5,45 +5,49 @@ import { __pbAuth } from '$utils/stores';
 import { setUserSettings } from '$src/hooks.client';
 
 export function dbSubscribe() {
-  pb.collection("users").subscribe("*", () => {
-    if (pb.authStore.isValid) pb.collection("users").authRefresh()
-      .catch(error => {
-        if (error.status == 401) {
-          pb.authStore.clear();
-        }
-      });
-    __pbAuth.set(pb.authStore);
-  });
+  pb.health.check().then(health => { if (health.code == 200) {
+    pb.collection("users").subscribe("*", () => {
+      if (pb.authStore.isValid) pb.collection("users").authRefresh()
+        .catch(error => {
+          if (error.status == 401) {
+            pb.authStore.clear();
+          }
+        });
+      __pbAuth.set(pb.authStore);
+    });
+  }}).catch(error => console.log(error));
 
   const wordHifdhCardUpSync = liveQuery(() => db.wordHifdhCard.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
+      
+      pb.health.check().then(health => { if (health.code == 200) {
+        const batch = pb.createBatch();
+        for (const record of result) {
+          batch.collection("wordHifdhCard").upsert({
+            "userID": pb.authStore.record.id,
+            "chapter": record.chapter,
+            "verse": record.verse,
+            "word": record.word,
+            "difficulty": record.difficulty,
+            "due": record.due,
+            "elapsed_days": record.elapsed_days,
+            "lapses": record.lapses,
+            "last_review": record.last_review,
+            "reps": record.reps,
+            "scheduled_days": record.scheduled_days,
+            "stability": record.stability,
+            "state": record.state,
+            "last_updated": record.last_updated,
+            ...(record.pocketbase_id && {id: record.pocketbase_id})
+          });
+        }
 
-      const batch = pb.createBatch();
-      for (const record of result) {
-        batch.collection("wordHifdhCard").upsert({
-          "userID": pb.authStore.record.id,
-          "chapter": record.chapter,
-          "verse": record.verse,
-          "word": record.word,
-          "difficulty": record.difficulty,
-          "due": record.due,
-          "elapsed_days": record.elapsed_days,
-          "lapses": record.lapses,
-          "last_review": record.last_review,
-          "reps": record.reps,
-          "scheduled_days": record.scheduled_days,
-          "stability": record.stability,
-          "state": record.state,
-          "last_updated": record.last_updated,
-          ...(record.pocketbase_id && {id: record.pocketbase_id})
-        });
-      }
-
-      batch.send().then(result => result.forEach(record => {
-        db.wordHifdhCard.where("[chapter+verse+word+last_updated]").equals([record.body.chapter, record.body.verse, record.body.word, toJSDate(record.body.last_updated)])
-          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-      })).catch(error => console.log(error));
+        batch.send().then(result => result.forEach(record => {
+          db.wordHifdhCard.where("[chapter+verse+word+last_updated]").equals([record.body.chapter, record.body.verse, record.body.word, toJSDate(record.body.last_updated)])
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+        })).catch(error => console.log(error));
+      }});
     },
     error: error => console.log(error)
   });
@@ -52,22 +56,24 @@ export function dbSubscribe() {
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
-      const batch = pb.createBatch();
-      for (const record of result) {
-        batch.collection("userBookmark").upsert({
-          "userID": pb.authStore.record.id,
-          "chapter": record.chapter,
-          "verse": record.verse,
-          "enabled": !!record.enabled,
-          "last_updated": record.last_updated,
-          ...(record.pocketbase_id && {id: record.pocketbase_id})
-        });
-      }
+      pb.health.check().then(health => { if (health.code == 200) {
+        const batch = pb.createBatch();
+        for (const record of result) {
+          batch.collection("userBookmark").upsert({
+            "userID": pb.authStore.record.id,
+            "chapter": record.chapter,
+            "verse": record.verse,
+            "enabled": !!record.enabled,
+            "last_updated": record.last_updated,
+            ...(record.pocketbase_id && {id: record.pocketbase_id})
+          });
+        }
 
-      batch.send().then(result => result.forEach(record => {
-        db.userBookmark.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
-          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-      })).catch(error => console.log(error));
+        batch.send().then(result => result.forEach(record => {
+          db.userBookmark.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+        })).catch(error => console.log(error));
+      }});
     },
     error: error => console.log(error)
   });
@@ -76,23 +82,25 @@ export function dbSubscribe() {
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
-      const batch = pb.createBatch();
-      for (const record of result) {
-        batch.collection("userNote").upsert({
-          "userID": pb.authStore.record.id,
-          "chapter": record.chapter,
-          "verse": record.verse,
-          "value": record.value,
-          "modified_at": record.modified_at,
-          "last_updated": record.last_updated,
-          ...(record.pocketbase_id && {id: record.pocketbase_id})
-        });
-      }
+      pb.health.check().then(health => { if (health.code == 200) {
+        const batch = pb.createBatch();
+        for (const record of result) {
+          batch.collection("userNote").upsert({
+            "userID": pb.authStore.record.id,
+            "chapter": record.chapter,
+            "verse": record.verse,
+            "value": record.value,
+            "modified_at": record.modified_at,
+            "last_updated": record.last_updated,
+            ...(record.pocketbase_id && {id: record.pocketbase_id})
+          });
+        }
 
-      batch.send().then(result => result.forEach(record => {
-        db.userNote.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
-          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-      })).catch(error => console.log(error));
+        batch.send().then(result => result.forEach(record => {
+          db.userNote.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+        })).catch(error => console.log(error));
+      }});
     },
     error: error => console.log(error)
   });
@@ -101,22 +109,24 @@ export function dbSubscribe() {
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
-      const batch = pb.createBatch();
-      for (const record of result) {
-        batch.collection("userFavouriteChapter").upsert({
-          "userID": pb.authStore.record.id,
-          "chapter": record.chapter,
-          "verse": record.verse,
-          "enabled": !!record.enabled,
-          "last_updated": record.last_updated,
-          ...(record.pocketbase_id && {id: record.pocketbase_id})
-        });
-      }
+      pb.health.check().then(health => { if (health.code == 200) {
+        const batch = pb.createBatch();
+        for (const record of result) {
+          batch.collection("userFavouriteChapter").upsert({
+            "userID": pb.authStore.record.id,
+            "chapter": record.chapter,
+            "verse": record.verse,
+            "enabled": !!record.enabled,
+            "last_updated": record.last_updated,
+            ...(record.pocketbase_id && {id: record.pocketbase_id})
+          });
+        }
 
-      batch.send().then(result => result.forEach(record => {
-        db.userFavouriteChapter.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
-          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-      })).catch(error => console.log(error));
+        batch.send().then(result => result.forEach(record => {
+          db.userFavouriteChapter.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+        })).catch(error => console.log(error));
+      }});
     },
     error: error => console.log(error)
   });
@@ -125,21 +135,23 @@ export function dbSubscribe() {
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
-      const batch = pb.createBatch();
-      for (const record of result) {
-        batch.collection("userSetting").upsert({
-          "userID": pb.authStore.record.id,
-          "name": record.name,
-          "value": JSON.stringify(record.value),
-          "last_updated": record.last_updated,
-          ...(record.pocketbase_id && {id: record.pocketbase_id})
-        });
-      }
+      pb.health.check().then(health => { if (health.code == 200) {
+        const batch = pb.createBatch();
+        for (const record of result) {
+          batch.collection("userSetting").upsert({
+            "userID": pb.authStore.record.id,
+            "name": record.name,
+            "value": JSON.stringify(record.value),
+            "last_updated": record.last_updated,
+            ...(record.pocketbase_id && {id: record.pocketbase_id})
+          });
+        }
 
-      batch.send().then(result => result.forEach(record => {
-        db.userSetting.where("[name+last_updated]").equals([record.body.name, toJSDate(record.body.last_updated)])
-          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-      })).catch(error => console.log(error));
+        batch.send().then(result => result.forEach(record => {
+          db.userSetting.where("[name+last_updated]").equals([record.body.name, toJSDate(record.body.last_updated)])
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+        })).catch(error => console.log(error));
+      }});
     },
     error: error => console.log(error)
   });
@@ -293,6 +305,9 @@ export async function downSyncFromDate(date) {
 export function startDownSyncInterval() {
   setInterval(async () => {
     if (!pb.authStore.isValid) return;
+
+    const health = await pb.health.check().catch(() => null);
+    if (health?.code != 200) return;
 
     const beforeSync = new Date();
     const lastDownSync = new Date(localStorage.getItem("lastDownSync")) ?? new Date(-8640000000000000);
