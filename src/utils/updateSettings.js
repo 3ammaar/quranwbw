@@ -31,6 +31,19 @@ import {
 import { db } from '$utils/dexieDB';
 // import { uploadSettingsToCloud } from '$utils/cloudSettings';
 
+function updateDBSetting(name, value) {
+	const newRecord = {name: name, value: value, last_updated: new Date(), synced: 0}
+	db.userSetting.get({name: name}).then(existingSetting => {
+		if (existingSetting) {
+			if (JSON.stringify(existingSetting.value) != JSON.stringify(newRecord.value)) {
+				db.userSetting.update(name, newRecord);
+			}
+		} else {
+			db.userSetting.put(newRecord);
+		}
+	});
+}
+
 // function to update website settings
 export function updateSettings(props) {
 	const userSettings = JSON.parse(get(__userSettings));
@@ -40,7 +53,7 @@ export function updateSettings(props) {
 		// for chapter number
 		case 'chapter':
 			userSettings.chapter = props.value;
-			db.userSetting.put({name: "chapter", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("chapter", props.value);
 			break;
 
 		// for font types
@@ -48,7 +61,7 @@ export function updateSettings(props) {
 			__fontType.set(props.value);
 			if (props.skipSave) return;
 			userSettings.displaySettings.fontType = props.value;
-			db.userSetting.put({name: "displaySettings.fontType", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.fontType", props.value);
 			break;
 
 		// for display types
@@ -56,21 +69,21 @@ export function updateSettings(props) {
 			__displayType.set(props.value);
 			if (props.skipSave) return;
 			userSettings.displaySettings.displayType = props.value;
-			db.userSetting.put({name: "displaySettings.displayType", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.displayType", props.value);
 			break;
 
 		// for word tooltip
 		case 'wordTooltip':
 			__wordTooltip.set(props.value);
 			userSettings.displaySettings.wordTooltip = props.value;
-			db.userSetting.put({name: "displaySettings.wordTooltip", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.wordTooltip", props.value);
 			break;
 
 		// for terminologies language
 		case 'englishTerminology':
 			__englishTerminology.set(props.value);
 			userSettings.displaySettings.englishTerminology = props.value;
-			db.userSetting.put({name: "displaySettings.englishTerminology", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.englishTerminology", props.value);
 			location.reload();
 			break;
 
@@ -78,7 +91,7 @@ export function updateSettings(props) {
 		case 'websiteTheme':
 			__websiteTheme.set(props.value);
 			userSettings.displaySettings.websiteTheme = props.value;
-			db.userSetting.put({name: "displaySettings.websiteTheme", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.websiteTheme", props.value);
 			localStorage.setItem('websiteTheme', props.value);
 			location.reload();
 			// document.documentElement.classList = '';
@@ -89,28 +102,28 @@ export function updateSettings(props) {
 		case 'wordTranslationEnabled':
 			__wordTranslationEnabled.set(props.value);
 			userSettings.displaySettings.wordTranslationEnabled = props.value;
-			db.userSetting.put({name: "displaySettings.wordTranslationEnabled", value: props.value ? 1 : 0, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.wordTranslationEnabled", props.value ? 1 : 0);
 			break;
 
 		// for word transliteration view
 		case 'wordTransliterationEnabled':
 			__wordTransliterationEnabled.set(props.value);
 			userSettings.displaySettings.wordTransliterationEnabled = props.value;
-			db.userSetting.put({name: "displaySettings.wordTransliterationEnabled", value: props.value ? 1 : 0, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.wordTransliterationEnabled", props.value ? 1 : 0);
 			break;
 
 		// for word translation
 		case 'wordTranslation':
 			__wordTranslation.set(props.value);
 			userSettings.translations.word = props.value;
-			db.userSetting.put({name: "translations.word", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("translations.word", props.value);
 			break;
 
 		// for word transliteration
 		case 'wordTransliteration':
 			__wordTransliteration.set(props.value);
 			userSettings.transliteration.word = props.value;
-			db.userSetting.put({name: "transliteration.word", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("transliteration.word", props.value);
 			break;
 
 		// for verse translations
@@ -122,11 +135,7 @@ export function updateSettings(props) {
 
 			// update the verse translations
 			userSettings.translations.verse_v1 = verseTranslations;
-			if (verseTranslations.includes(props.value)) {
-				db.userVerseTranslationsSetting.put({name: props.value, enabled: 1, last_updated: new Date(), synced: 0});
-			} else {
-				db.userVerseTranslationsSetting.put({name: props.value, enabled: 0, last_updated: new Date(), synced: 0});
-			}
+			updateDBSetting("transliteration.verse_v1", JSON.stringify(verseTranslations));
 			__verseTranslations.set(verseTranslations);
 			break;
 
@@ -134,47 +143,47 @@ export function updateSettings(props) {
 		case 'verseTafsir':
 			__verseTafsir.set(props.value);
 			userSettings.translations.tafsir = props.value;
-			db.userSetting.put({name: "translations.tafsir", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("translations.tafsir", props.value);
 			break;
 
 		// for verse reciter
 		case 'reciter':
 			__reciter.set(props.value);
 			userSettings.audioSettings.reciter = props.value;
-			db.userSetting.put({name: "audioSettings.reciter", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("audioSettings.reciter", props.value);
 			break;
 
 		// for translation reciter
 		case 'translationReciter':
 			__translationReciter.set(props.value);
 			userSettings.audioSettings.translationReciter = props.value;
-			db.userSetting.put({name: "audioSettings.translationReciter", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("audioSettings.translationReciter", props.value);
 			break;
 
 		// for playback speed
 		case 'playbackSpeed':
 			__playbackSpeed.set(props.value);
 			userSettings.audioSettings.playbackSpeed = props.value;
-			db.userSetting.put({name: "audioSettings.playbackSpeed", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("audioSettings.playbackSpeed", props.value);
 			break;
 
 		// for play translation toggle
 		case 'playTranslation':
 			__playTranslation.set(props.value);
 			userSettings.audioSettings.playTranslation = props.value;
-			db.userSetting.put({name: "audioSettings.playTranslation", value: props.value ? 1 : 0, last_updated: new Date(), synced: 0});
+			updateDBSetting("audioSettings.playTranslation", props.value ? 1 : 0);
 			break;
 
 		// for Initial Setup
 		case 'initialSetupCompleted':
 			userSettings.initialSetupCompleted = props.value;
-			db.userSetting.put({name: "initialSetupCompleted", value: props.value ? 1 : 0, last_updated: new Date(), synced: 0});
+			updateDBSetting("initialSetupCompleted", props.value ? 1 : 0);
 			break;
 
 		// for v4 features modal
 		case 'changelogModal':
 			userSettings.oneTimeModals.changelogModal = props.value;
-			db.userSetting.put({name: "oneTimeModals.changelogModal", value: props.value ? 1 : 0, last_updated: new Date(), synced: 0});
+			updateDBSetting("oneTimeModals.changelogModal", props.value ? 1 : 0);
 			break;
 
 		case 'userBookmarks':
@@ -254,7 +263,7 @@ export function updateSettings(props) {
 			if (props.override) {
 				userNotes = notes_key;
 				const now = new Date();
-				db.userNote.where("value").notEqual("").modify({value: "", last_updated: now, synced: 0}).then(() => {
+				db.userNote.where("value").notEqual("").modify({value: "", modified_at: null, last_updated: now, synced: 0}).then(() => {
 					for (const [verseKey, note] of notes_key) {
 						const chapter = Number(verseKey.split(":")[0]);
 						const verse = Number(verseKey.split(":")[1]);
@@ -262,7 +271,8 @@ export function updateSettings(props) {
 							chapter: chapter, 
 							verse: verse,
 							value: note.note,
-							last_updated: note.modified_at,
+							modified_at: note.modified_at,
+							last_updated: now,
 							synced: 0
 						};
 						db.userNote.get({chapter: chapter, verse: verse}).then(existingNote => {
@@ -295,6 +305,7 @@ export function updateSettings(props) {
 					chapter: chapter, 
 					verse: verse,
 					value: userNotes[notes_key]?.note ?? "",
+					modified_at: userNotes[notes_key]?.modified_at ?? null,
 					last_updated: now,
 					synced: 0
 				};
@@ -320,7 +331,7 @@ export function updateSettings(props) {
 			if (['chapter', 'mushaf'].includes(get(__currentPage))) {
 				__lastRead.set(props.value);
 				userSettings.lastRead = props.value;
-				db.userSetting.put({name: "lastRead", value: props.value.key, value2: props.value.page, last_updated: new Date(), synced: 0});
+				updateDBSetting("lastRead", JSON.stringify(props.value));
 			}
 			break;
 
@@ -328,35 +339,35 @@ export function updateSettings(props) {
 		case 'autoScrollSpeed':
 			__autoScrollSpeed.set(props.value);
 			userSettings.displaySettings.autoScrollSpeed = props.value;
-			db.userSetting.put({name: "displaySettings.autoScrollSpeed", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.autoScrollSpeed", props.value);
 			break;
 
 		// for toggling wakeLock
 		case 'wakeLockEnabled':
 			__wakeLockEnabled.set(props.value);
 			userSettings.displaySettings.wakeLockEnabled = props.value;
-			db.userSetting.put({name: "displaySettings.wakeLockEnabled", value: props.value ? 1 : 0, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.wakeLockEnabled", props.value ? 1 : 0);
 			break;
 
 		// for toggling non-dua words
 		case 'hideNonDuaPart':
 			__hideNonDuaPart.set(props.value);
 			userSettings.displaySettings.hideNonDuaPart = props.value;
-			db.userSetting.put({name: "displaySettings.hideNonDuaPart", value: props.value ? 1 : 0, last_updated: new Date(), synced: 0});
+			updateDBSetting("displaySettings.hideNonDuaPart", props.value ? 1 : 0);
 			break;
 
 		// for quiz correct answers
 		case 'quizCorrectAnswers':
 			__quizCorrectAnswers.set(props.value);
 			userSettings.quiz.correctAnswers = props.value;
-			db.userSetting.put({name: "quiz.correctAnswers", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("quiz.correctAnswers", props.value);
 			break;
 
 		// for quiz wrong answers
 		case 'quizWrongAnswers':
 			__quizWrongAnswers.set(props.value);
 			userSettings.quiz.wrongAnswers = props.value;
-			db.userSetting.put({name: "quiz.wrongAnswers", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("quiz.wrongAnswers", props.value);
 			break;
 
 		// for verse play button
@@ -366,7 +377,7 @@ export function updateSettings(props) {
 				toolbar: 1
 			});
 			userSettings.audioSettings.versePlayButton = props.value;
-			db.userSetting.put({name: "audioSettings.versePlayButton", value: props.value, last_updated: new Date(), synced: 0});
+			updateDBSetting("audioSettings.versePlayButton", props.value);
 			break;
 
 		// for increasing/decreasing font sizes
@@ -396,7 +407,7 @@ export function updateSettings(props) {
 
 			// update it in localSettings
 			userSettings.displaySettings.fontSizes[`${props.type}`] = newSize;
-			db.userSetting.put({name: `displaySettings.fontSizes.${props.type}`, value: newSize, last_updated: new Date(), synced: 0});
+			updateDBSetting(`displaySettings.fontSizes.${props.type}`, newSize);
 
 			break;
 			

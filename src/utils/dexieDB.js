@@ -16,6 +16,7 @@ db.version(1).stores({
     last_review,
     interval,
     last_updated,
+    [chapter+verse+word+last_updated],
     synced,
     pocketbase_id,
     [chapter+due],
@@ -24,9 +25,8 @@ db.version(1).stores({
     [chapter+verse+due],
     [chapter+verse+interval]
   `,
-  userSetting: `name, value, value2, last_updated, synced`,
-  userVerseTranslationsSetting: `name, enabled, last_updated, synced`,
-  userBookmark: `[chapter+verse], enabled, last_updated, synced, pocketbase_id`,
-  userNote: `[chapter+verse], value, last_updated, synced, pocketbase_id`,
-  userFavouriteChapter: `[chapter+verse], enabled, last_updated, synced, pocketbase_id`
+  userSetting: `name, value, last_updated, [name+last_updated], synced, pocketbase_id`,
+  userBookmark: `[chapter+verse], enabled, last_updated, [chapter+verse+last_updated], synced, pocketbase_id`,
+  userNote: `[chapter+verse], value, modified_at, last_updated, [chapter+verse+last_updated], synced, pocketbase_id`,
+  userFavouriteChapter: `[chapter+verse], enabled, last_updated, [chapter+verse+last_updated], synced, pocketbase_id`
 });

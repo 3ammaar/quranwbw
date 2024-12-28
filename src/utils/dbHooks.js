@@ -41,7 +41,7 @@ export function dbSubscribe() {
       }
 
       batch.send().then(result => result.forEach(record => {
-        db.wordHifdhCard.where("[chapter+verse+word]").equals([record.body.chapter, record.body.verse, record.body.word])
+        db.wordHifdhCard.where("[chapter+verse+word+last_updated]").equals([record.body.chapter, record.body.verse, record.body.word, toJSDate(record.body.last_updated)])
           .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
       })).catch(error => console.log(error));
     },
@@ -65,7 +65,7 @@ export function dbSubscribe() {
       }
 
       batch.send().then(result => result.forEach(record => {
-        db.userBookmark.where("[chapter+verse]").equals([record.body.chapter, record.body.verse])
+        db.userBookmark.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
           .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
       })).catch(error => console.log(error));
     },
@@ -83,13 +83,14 @@ export function dbSubscribe() {
           "chapter": record.chapter,
           "verse": record.verse,
           "value": record.value,
+          "modified_at": record.modified_at,
           "last_updated": record.last_updated,
           ...(record.pocketbase_id && {id: record.pocketbase_id})
         });
       }
 
       batch.send().then(result => result.forEach(record => {
-        db.userNote.where("[chapter+verse]").equals([record.body.chapter, record.body.verse])
+        db.userNote.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
           .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
       })).catch(error => console.log(error));
     },
@@ -113,7 +114,30 @@ export function dbSubscribe() {
       }
 
       batch.send().then(result => result.forEach(record => {
-        db.userFavouriteChapter.where("[chapter+verse]").equals([record.body.chapter, record.body.verse])
+        db.userFavouriteChapter.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
+          .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+      })).catch(error => console.log(error));
+    },
+    error: error => console.log(error)
+  });
+
+  const userSettingUpSync = liveQuery(() => db.userSetting.where("synced").notEqual(1).toArray()).subscribe({
+    next: result => {
+      if (!pb.authStore.isValid || !result?.length) return;
+
+      const batch = pb.createBatch();
+      for (const record of result) {
+        batch.collection("userSetting").upsert({
+          "userID": pb.authStore.record.id,
+          "name": record.name,
+          "value": JSON.stringify(record.value),
+          "last_updated": record.last_updated,
+          ...(record.pocketbase_id && {id: record.pocketbase_id})
+        });
+      }
+
+      batch.send().then(result => result.forEach(record => {
+        db.userSetting.where("[name+last_updated]").equals([record.body.name, toJSDate(record.body.last_updated)])
           .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
       })).catch(error => console.log(error));
     },
@@ -126,6 +150,7 @@ export function dbSubscribe() {
     userBookmarkUpSync.unsubscribe();
     userNoteUpSync.unsubscribe();
     userFavouriteChapterUpSync.unsubscribe();
+    userSettingUpSync.unsubscribe();
   };
 }
 
@@ -207,6 +232,7 @@ export async function downSyncFromDate(date) {
       chapter: record.chapter,
       verse: record.verse,
       value: record.value,
+      modified_at: toJSDate(record.modified_at),
       last_updated: toJSDate(record.last_updated),
       synced: 1,
       pocketbase_id: record.id
@@ -238,6 +264,27 @@ export async function downSyncFromDate(date) {
     });
   }
 
+  const userSettingRecords = await pb.collection("userSetting").getFullList({
+    filter: `last_updated > "${toPBDate(date)}"`
+  }).catch(error => {
+    console.log(error);
+    success = false;
+    return [];
+  });
+
+  for (const record of userSettingRecords) {
+    await db.userSetting.put({
+      name: record.name,
+      value: JSON.parse(record.value),
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
+    }).catch(error => {
+      console.log(error);
+      success = false;
+    });
+  }
+
   return success;
 }
 
@@ -250,12 +297,12 @@ export function startDownSyncInterval() {
     const beforeSync = new Date();
     const lastDownSync = new Date(localStorage.getItem("lastDownSync")) ?? new Date(-8640000000000000);
     
-    let success = downSyncFromDate(lastDownSync);
+    let success = await downSyncFromDate(lastDownSync);
 
     if (success) {
       localStorage.setItem("lastDownSync", beforeSync);
     }
 
-    setUserSettings(false);
+    await setUserSettings(false);
   }, 20000);
 }

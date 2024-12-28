@@ -1181,6 +1181,17 @@ migrate((app) => {
         },
         {
           "hidden": false,
+          "id": "date1885693820",
+          "max": "",
+          "min": "",
+          "name": "modified_at",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "date"
+        },
+        {
+          "hidden": false,
           "id": "date2685905599",
           "max": "",
           "min": "",
@@ -1324,6 +1335,108 @@ migrate((app) => {
       ],
       "listRule": "userID = @request.auth.id",
       "name": "userFavouriteChapter",
+      "system": false,
+      "type": "base",
+      "updateRule": "userID = @request.auth.id",
+      "viewRule": "userID = @request.auth.id"
+    },
+    {
+      "createRule": "userID = @request.auth.id",
+      "deleteRule": "userID = @request.auth.id",
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "cascadeDelete": false,
+          "collectionId": "_pb_users_auth_",
+          "hidden": false,
+          "id": "relation1608019204",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "userID",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text1579384326",
+          "max": 0,
+          "min": 0,
+          "name": "name",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text494360628",
+          "max": 0,
+          "min": 0,
+          "name": "value",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "date2685905599",
+          "max": "",
+          "min": "",
+          "name": "last_updated",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "date"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_1012489934",
+      "indexes": [
+        "CREATE UNIQUE INDEX `userSetting_name` ON `userSetting` (`name`)"
+      ],
+      "listRule": "userID = @request.auth.id",
+      "name": "userSetting",
       "system": false,
       "type": "base",
       "updateRule": "userID = @request.auth.id",
