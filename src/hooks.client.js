@@ -1,9 +1,9 @@
 import { db } from '$utils/dexieDB';
-import { initialiseUserSettingsStores } from '$utils/stores';
+import { initialiseUserSettingsStores, setUserSettingsStores } from '$utils/stores';
 import { dbSubscribe, startDownSyncInterval } from '$utils/dbHooks';
 
 (async function () {
-	await setUserSettings();
+	await setUserSettings(true);
 	dbSubscribe();
 	startDownSyncInterval();
 })();
@@ -223,7 +223,7 @@ export async function getUserSettingsOrDefaultFromDB() {
 	if (!userSettings.displaySettings.fontSizes) userSettings.displaySettings.fontSizes = {}; // Parent
 
 	userSettings.displaySettings.fontSizes.arabicText = dbUserSettings["displaySettings.fontSizes.arabicText"] ?? arabicTextSize;
-	userSettings.displaySettings.fontSizes.wordTranslationText =dbUserSettings["displaySettings.fontSizes.wordTranslationText"] ?? 'text-sm';
+	userSettings.displaySettings.fontSizes.wordTranslationText = dbUserSettings["displaySettings.fontSizes.wordTranslationText"] ?? 'text-sm';
 	userSettings.displaySettings.fontSizes.verseTranslationText = dbUserSettings["displaySettings.fontSizes.verseTranslationText"] ?? 'text-sm';
 
 	// Translation settings
@@ -294,20 +294,25 @@ export async function getUserSettingsOrDefaultFromDB() {
 	return userSettings;
 }
 
+
 /**
  * Sets the user settings in global stores to those in the DB or default values.
  * This function is also used by resetSettings.js.
  */
-export async function setUserSettings() {
-	moveUserSettingsFromLocalStorageToDB();
+export async function setUserSettings(initialise) {
+	if (initialise) moveUserSettingsFromLocalStorageToDB();
 
 	let userSettings = await getUserSettingsOrDefaultFromDB();
 
 	const previousWebsiteTheme = localStorage.getItem('websiteTheme') ?? 1;
 	localStorage.setItem('websiteTheme', userSettings.displaySettings.websiteTheme);
-	initialiseUserSettingsStores(userSettings);
+
+	if (initialise) initialiseUserSettingsStores(userSettings);
+	else setUserSettingsStores(userSettings);
 
 	if (userSettings.displaySettings.websiteTheme != previousWebsiteTheme) {
+		console.log(userSettings.displaySettings.websiteTheme);
+		console.log(previousWebsiteTheme);
 		location.reload();
 	}
 }

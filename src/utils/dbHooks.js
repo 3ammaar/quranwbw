@@ -2,6 +2,7 @@ import { db } from '$utils/dexieDB';
 import { liveQuery } from 'dexie';
 import { pb } from '$utils/pocketBaseDB';
 import { __pbAuth } from '$utils/stores';
+import { setUserSettings } from '$src/hooks.client';
 
 export function dbSubscribe() {
   pb.collection("users").subscribe("*", () => {
@@ -95,7 +96,7 @@ export function dbSubscribe() {
     error: error => console.log(error)
   });
 
-  const userFavouriteChapterUpSync = liveQuery(() => db.userFavouriteChapterUpSync.where("synced").notEqual(1).toArray()).subscribe({
+  const userFavouriteChapterUpSync = liveQuery(() => db.userFavouriteChapter.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
@@ -254,5 +255,7 @@ export function startDownSyncInterval() {
     if (success) {
       localStorage.setItem("lastDownSync", beforeSync);
     }
+
+    setUserSettings(false);
   }, 20000);
 }

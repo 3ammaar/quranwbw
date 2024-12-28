@@ -230,10 +230,8 @@ export function updateSettings(props) {
 				db.userBookmark.get({chapter: chapter, verse: verse}).then(existingBookmark => {
 					if (existingBookmark) {
 						db.userBookmark.update([chapter, verse], newRecord);
-						console.log(newRecord);
 					} else {
 						db.userBookmark.put(newRecord);
-						console.log(newRecord);
 					}
 				}).catch(e => console.log(e));
 			}
