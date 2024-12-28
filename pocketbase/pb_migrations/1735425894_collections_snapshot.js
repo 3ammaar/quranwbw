@@ -994,7 +994,7 @@ migrate((app) => {
       ],
       "id": "pbc_3935192847",
       "indexes": [
-        "CREATE UNIQUE INDEX `wordHifdhCard_chapterVerseWord` ON `wordHifdhCard` (\n  `chapter`,\n  `verse`,\n  `word`\n)"
+        "CREATE UNIQUE INDEX `wordHifdhCard_chapterVerseWord` ON `wordHifdhCard` (\n  `chapter`,\n  `verse`,\n  `word`,\n  `userID`\n)"
       ],
       "listRule": "userID = @request.auth.id",
       "name": "wordHifdhCard",
@@ -1101,13 +1101,13 @@ migrate((app) => {
       ],
       "id": "pbc_1489587002",
       "indexes": [
-        "CREATE UNIQUE INDEX `userBookmark_chapterVerse` ON `userBookmark` (\n  `chapter`,\n  `verse`\n)"
+        "CREATE UNIQUE INDEX `userBookmark_chapterVerse` ON `userBookmark` (\n  `chapter`,\n  `verse`,\n  `userID`\n)"
       ],
       "listRule": "userID = @request.auth.id",
       "name": "userBookmark",
       "system": false,
       "type": "base",
-      "updateRule": "userID = @request.auth.id",
+      "updateRule": "userID = @request.auth.id && last_updated < @request.body.last_updated",
       "viewRule": "userID = @request.auth.id"
     },
     {
@@ -1224,13 +1224,13 @@ migrate((app) => {
       ],
       "id": "pbc_2310829378",
       "indexes": [
-        "CREATE UNIQUE INDEX `userNote_chapterVerse` ON `userNote` (\n  `chapter`,\n  `verse`\n)"
+        "CREATE UNIQUE INDEX `userNote_chapterVerse` ON `userNote` (\n  `chapter`,\n  `verse`,\n  `userID`\n)"
       ],
       "listRule": "userID = @request.auth.id",
       "name": "userNote",
       "system": false,
       "type": "base",
-      "updateRule": "userID = @request.auth.id",
+      "updateRule": "userID = @request.auth.id && last_updated < @request.body.last_updated",
       "viewRule": "userID = @request.auth.id"
     },
     {
@@ -1331,13 +1331,13 @@ migrate((app) => {
       ],
       "id": "pbc_2597630981",
       "indexes": [
-        "CREATE UNIQUE INDEX `userFavouriteChapter_chapterVerse` ON `userFavouriteChapter` (\n  `chapter`,\n  `verse`\n)"
+        "CREATE UNIQUE INDEX `userFavouriteChapter_chapterVerse` ON `userFavouriteChapter` (\n  `chapter`,\n  `verse`,\n  `userID`\n)"
       ],
       "listRule": "userID = @request.auth.id",
       "name": "userFavouriteChapter",
       "system": false,
       "type": "base",
-      "updateRule": "userID = @request.auth.id",
+      "updateRule": "userID = @request.auth.id && last_updated < @request.body.last_updated",
       "viewRule": "userID = @request.auth.id"
     },
     {
@@ -1433,13 +1433,13 @@ migrate((app) => {
       ],
       "id": "pbc_1012489934",
       "indexes": [
-        "CREATE UNIQUE INDEX `userSetting_name` ON `userSetting` (`name`)"
+        "CREATE UNIQUE INDEX `userSetting_name` ON `userSetting` (\n  `name`,\n  `userID`\n)"
       ],
       "listRule": "userID = @request.auth.id",
       "name": "userSetting",
       "system": false,
       "type": "base",
-      "updateRule": "userID = @request.auth.id",
+      "updateRule": "userID = @request.auth.id && last_updated < @request.body.last_updated",
       "viewRule": "userID = @request.auth.id"
     }
   ];

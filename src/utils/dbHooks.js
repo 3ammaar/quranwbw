@@ -46,7 +46,14 @@ export function dbSubscribe() {
         batch.send().then(result => result.forEach(record => {
           db.wordHifdhCard.where("[chapter+verse+word+last_updated]").equals([record.body.chapter, record.body.verse, record.body.word, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-        })).catch(error => console.log(error));
+        })).catch(error => {
+          const collisions = error?.data?.collisions;
+          if (!collisions) {
+            console.log(error);
+            return;
+          }
+          putCollisions(collisions);
+        });
       }}).catch(() => false);
     },
     error: error => console.log(error)
@@ -72,7 +79,14 @@ export function dbSubscribe() {
         batch.send().then(result => result.forEach(record => {
           db.userBookmark.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-        })).catch(error => console.log(error));
+        })).catch(error => {
+          const collisions = error?.data?.collisions;
+          if (!collisions) {
+            console.log(error);
+            return;
+          }
+          putCollisions(collisions);
+        });
       }}).catch(() => false);
     },
     error: error => console.log(error)
@@ -99,7 +113,14 @@ export function dbSubscribe() {
         batch.send().then(result => result.forEach(record => {
           db.userNote.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-        })).catch(error => console.log(error));
+        })).catch(error => {
+          const collisions = error?.data?.data?.collisions;
+          if (!collisions) {
+            console.log(error);
+            return;
+          }
+          putCollisions(collisions);
+        });
       }}).catch(() => false);
     },
     error: error => console.log(error)
@@ -125,7 +146,14 @@ export function dbSubscribe() {
         batch.send().then(result => result.forEach(record => {
           db.userFavouriteChapter.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-        })).catch(error => console.log(error));
+        })).catch(error => {
+          const collisions = error?.data?.collisions;
+          if (!collisions) {
+            console.log(error);
+            return;
+          }
+          putCollisions(collisions);
+        });
       }}).catch(() => false);
     },
     error: error => console.log(error)
@@ -150,7 +178,14 @@ export function dbSubscribe() {
         batch.send().then(result => result.forEach(record => {
           db.userSetting.where("[name+last_updated]").equals([record.body.name, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
-        })).catch(error => console.log(error));
+        })).catch(error => {
+          const collisions = error?.data?.collisions;
+          if (!collisions) {
+            console.log(error);
+            return;
+          }
+          putCollisions(collisions);
+        });
       }}).catch(() => false);
     },
     error: error => console.log(error)
@@ -174,19 +209,40 @@ export function toJSDate(date) {
   return new Date(date.replace(' ', 'T'));
 }
 
-export async function downSyncFromDate(date) {
-  let success = true;
+function putCollisions(collisions) {
+  for (const {table, body} of collisions) {
+    if (table == "wordHifdhCard") putWordHifdhCardRecords([body], true);
+    if (table == "userSetting") putUserSettingRecords([body], true);
+    if (table == "userBookmark") putUserBookmarkRecords([body], true);
+    if (table == "userNote") putUserNoteRecords([body], true);
+    if (table == "userFavouriteChapter") putUserFavouriteChapterRecords([body], true);
+  }
+}
 
-  const wordHifdhCardRecords = await pb.collection("wordHifdhCard").getFullList({
-    filter: `last_updated > "${toPBDate(date)}"`
+function putIfNotSooner(tableName, key, newRecord) {
+  return db.table(tableName).get(key).then(existing => {
+    if (!existing || existing.last_updated <= newRecord.last_updated) {
+      return db.table(tableName).put(newRecord).then(() => true).catch(error => {
+        console.log(error);
+        return false;
+      });
+    } else if (existing) {
+      return db.table(tableName).update(key, {pocketbase_id: newRecord.pocketbase_id, synced: 0})
+        .then(() => true).catch(error => {
+          console.log(error);
+          return false;
+        });
+    }
+    return true;
   }).catch(error => {
     console.log(error);
-    success = false;
-    return [];
+    return false;
   });
+}
 
+async function putWordHifdhCardRecords(wordHifdhCardRecords, soonerCheck = false) {
   for (const record of wordHifdhCardRecords) {
-    await db.wordHifdhCard.put({
+    const newRecord = {
       chapter: record.chapter,
       verse: record.verse,
       word: record.word,
@@ -203,11 +259,124 @@ export async function downSyncFromDate(date) {
       last_updated: toJSDate(record.last_updated),
       synced: 1,
       pocketbase_id: record.id
-    }).catch(error => {
+    };
+
+    if (soonerCheck) return await putIfNotSooner(
+      "wordHifdhCard", 
+      {chapter: record.chapter, verse: record.verse, word: record.word}, 
+      newRecord
+    );
+    else return await db.wordHifdhCard.put(newRecord).then(() => true).catch(error => {
       console.log(error);
-      success = false;
+      return false;
     });
   }
+}
+
+async function putUserBookmarkRecords(userBookmarkRecords, soonerCheck = false) {
+  for (const record of userBookmarkRecords) {
+    const newRecord = {
+      chapter: record.chapter,
+      verse: record.verse,
+      enabled: record.enabled ? 1 : 0,
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
+    }
+
+    if (soonerCheck) return await putIfNotSooner(
+      "userBookmark",
+      {chapter: record.chapter, verse: record.verse},
+      newRecord
+    );
+    else return await db.userBookmark.put(newRecord).then(() => true).catch(error => {
+      console.log(error);
+      return false;
+    });
+  }
+}
+
+async function putUserNoteRecords(userNoteRecords, soonerCheck = false) {
+  for (const record of userNoteRecords) {
+    const newRecord = {
+      chapter: record.chapter,
+      verse: record.verse,
+      value: record.value,
+      modified_at: toJSDate(record.modified_at),
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
+    }
+
+    if (soonerCheck) return await putIfNotSooner(
+      "userNote",
+      {chapter: record.chapter, verse: record.verse},
+      newRecord
+    );
+    else return await db.userNote.put(newRecord).then(() => true).catch(error => {
+      console.log(error);
+      return false;
+    });
+  }
+}
+
+async function putUserFavouriteChapterRecords(userFavouriteChapterRecords, soonerCheck = false) {
+  for (const record of userFavouriteChapterRecords) {
+    const newRecord = {
+      chapter: record.chapter,
+      verse: record.verse,
+      enabled: record.enabled ? 1 : 0,
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
+    }
+
+    if (soonerCheck) return await putIfNotSooner(
+      "userFavouriteChapter",
+      {chapter: record.chapter, verse: record.verse},
+      newRecord
+    );
+    else return await db.userFavouriteChapter.put(newRecord).then(() => true).catch(error => {
+      console.log(error);
+      return false;
+    });
+  }
+}
+
+async function putUserSettingRecords(userSettingRecords, soonerCheck = false) {
+  for (const record of userSettingRecords) {
+    const newRecord = {
+      name: record.name,
+      value: JSON.parse(record.value),
+      last_updated: toJSDate(record.last_updated),
+      synced: 1,
+      pocketbase_id: record.id
+    }
+
+    if (soonerCheck) return await putIfNotSooner(
+      "userSetting",
+      {name: record.name},
+      newRecord
+    );
+    else return await db.userSetting.put(newRecord).then(() => true).catch(error => {
+      console.log(error);
+      return false;
+    });
+  }
+}
+
+export async function downSyncFromDate(date) {
+  let success = true;
+
+  const wordHifdhCardRecords = await pb.collection("wordHifdhCard").getFullList({
+    filter: `last_updated > "${toPBDate(date)}"`
+  }).catch(error => {
+    console.log(error);
+    success = false;
+    return [];
+  });
+
+  success = (await putWordHifdhCardRecords(wordHifdhCardRecords)) && success;
 
   const userBookmarkRecords = await pb.collection("userBookmark").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
@@ -217,19 +386,7 @@ export async function downSyncFromDate(date) {
     return [];
   });
 
-  for (const record of userBookmarkRecords) {
-    await db.userBookmark.put({
-      chapter: record.chapter,
-      verse: record.verse,
-      enabled: record.enabled ? 1 : 0,
-      last_updated: toJSDate(record.last_updated),
-      synced: 1,
-      pocketbase_id: record.id
-    }).catch(error => {
-      console.log(error);
-      success = false;
-    });
-  }
+  success = (await putUserBookmarkRecords(userBookmarkRecords)) && success;
 
   const userNoteRecords = await pb.collection("userNote").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
@@ -239,20 +396,7 @@ export async function downSyncFromDate(date) {
     return [];
   });
 
-  for (const record of userNoteRecords) {
-    await db.userNote.put({
-      chapter: record.chapter,
-      verse: record.verse,
-      value: record.value,
-      modified_at: toJSDate(record.modified_at),
-      last_updated: toJSDate(record.last_updated),
-      synced: 1,
-      pocketbase_id: record.id
-    }).catch(error => {
-      console.log(error);
-      success = false;
-    });
-  }
+  success = (await putUserNoteRecords(userNoteRecords)) && success;
 
   const userFavouriteChapterRecords = await pb.collection("userFavouriteChapter").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
@@ -262,19 +406,7 @@ export async function downSyncFromDate(date) {
     return [];
   });
 
-  for (const record of userFavouriteChapterRecords) {
-    await db.userFavouriteChapter.put({
-      chapter: record.chapter,
-      verse: record.verse,
-      enabled: record.enabled ? 1 : 0,
-      last_updated: toJSDate(record.last_updated),
-      synced: 1,
-      pocketbase_id: record.id
-    }).catch(error => {
-      console.log(error);
-      success = false;
-    });
-  }
+  success = (await putUserFavouriteChapterRecords(userFavouriteChapterRecords)) && success;
 
   const userSettingRecords = await pb.collection("userSetting").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
@@ -284,18 +416,7 @@ export async function downSyncFromDate(date) {
     return [];
   });
 
-  for (const record of userSettingRecords) {
-    await db.userSetting.put({
-      name: record.name,
-      value: JSON.parse(record.value),
-      last_updated: toJSDate(record.last_updated),
-      synced: 1,
-      pocketbase_id: record.id
-    }).catch(error => {
-      console.log(error);
-      success = false;
-    });
-  }
+  success = (await putUserSettingRecords(userSettingRecords)) && success;
 
   return success;
 }
