@@ -5,7 +5,12 @@
     import Input from '$ui/FlowbiteSvelte/forms/Input.svelte';
 	import { __currentPage, __pbAuth } from '$utils/stores';
     import { buttonClasses } from '$data/commonClasses';
-    import { pb } from '$utils/pocketBaseDB'
+    import { pb } from '$utils/pocketBaseDB';
+    import { db } from '$utils/dexieDB';
+    import { resetSettings } from '$utils/resetSettings';
+    import { downSync } from '$utils/dbHooks';
+    import { setUserSettings } from '$src/hooks.client';
+
 
     //TODO improve error handling, including error message management and content - this page and sub-pages
     //TODO improve styling - this page and sub-pages
@@ -16,6 +21,7 @@
     let successMessage;
     let isSigningUp = false;
     let isChangingEmail = false;
+    let confirmSignOut = false;
 
     let email = "";
     let password = "";
@@ -44,6 +50,12 @@
             }
             return;
         });
+
+        if (signedInUser) {
+            clearDB();
+            await downSync();
+            await setUserSettings(false);
+        }
 
         if (!signedInUser && !errorMessage) {
             errorMessage = "Unknown error";
@@ -121,6 +133,8 @@
         confirmPassword = "";
         
         pb.authStore.clear();
+        clearDB();
+        resetSettings();
 
         loading = false;
     }
@@ -178,6 +192,15 @@
         loading = false;
     }
 
+    function clearDB() {
+        db.wordHifdhCard.clear();
+        db.userSetting.clear();
+        db.userBookmark.clear();
+        db.userNote.clear();
+        db.userFavouriteChapter.clear();
+        localStorage.setItem("lastDownSync", "-8640000000000000");
+    }
+
 	__currentPage.set('account');
 </script>
 
@@ -214,7 +237,7 @@
                     </div>
                     {:else}
                     <div>
-                        <h3>Your email has been verified.</h3>
+                        <h3>Your email has been verified. Your settings, bookmarks, notes and other data will be synced.</h3>
                         <!-- <h3>Your settings, bookmarks, notes and other data will be synced to your account.</h3> -->
                     </div>
                     {/if}
@@ -226,7 +249,7 @@
                         Need to change email?
                     </div>
                     <button
-                        on:click={() => {isChangingEmail = !isChangingEmail}}
+                        on:click={() => {isChangingEmail = !isChangingEmail; confirmSignOut = false;}}
                         class="{buttonClasses}"
                     >Change email address</button>
                 </div>
@@ -243,13 +266,13 @@
                     </div>
                         <div class="flex flex-row">
                             <button
-                                on:click={() => changeEmail()}
+                                on:click={() => {changeEmail(); confirmSignOut = false;}}
                                 disabled={loading}
                                 class="{buttonClasses} grow"
                                 type="submit"
                             >Submit</button>
                             <button
-                                on:click={() => isChangingEmail = !isChangingEmail}
+                                on:click={() => {isChangingEmail = !isChangingEmail; confirmSignOut = false;}}
                                 disabled={loading}
                                 class="{buttonClasses} ml-2 grow"
                             >Cancel</button>
@@ -259,15 +282,34 @@
                 {/if}
 
                 {#if !isChangingEmail}
+
+                {#if !confirmSignOut}
                 <button
-                    on:click={() => signOut()}
+                    on:click={() => {confirmSignOut = true;}}
                     disabled={loading}
                     class="{buttonClasses} mt-4"
                 >Sign out</button>
+                {:else}
+                <h3 class="mt-4">Warning - signing out will delete unsynced changes.</h3>
+                <div class="flex flex-row mt-2">
+                    <div class="w-full">
+                        <button
+                            on:click={() => {signOut(); confirmSignOut = false;}}
+                            class="{buttonClasses} w-full mr-2"
+                        >Confirm sign out</button>
+                    </div>
+                    <div class="w-full">
+                        <button
+                            on:click={() => {confirmSignOut = false;}}
+                            class="{buttonClasses} w-full ml-2"
+                        >Cancel</button>
+                    </div>
+                </div>
+                {/if}
 
                 <div class="flex flex-row mt-4">
                     <button
-                        on:click={() => {resetPassword()}}
+                        on:click={() => {resetPassword(); confirmSignOut = false;}}
                         class="{buttonClasses}"
                     >Reset password</button>
                 </div>
@@ -295,7 +337,7 @@
                     {/if}
                     <div class="flex flex-row mt-4">
                         <button
-                            on:click={() => isSigningUp ? signUpWithEmail() : signInWithEmail()}
+                            on:click={() => {isSigningUp ? signUpWithEmail() : signInWithEmail(); confirmSignOut = false;}}
                             class="w-full mr-2 {buttonClasses}"
                             type="submit"
                         >{isSigningUp ? "Sign up" : "Sign in"}</button>
@@ -306,14 +348,14 @@
                         {isSigningUp ? "Have an account?" : "Need an account?"}
                     </div>
                     <button
-                        on:click={() => {isSigningUp = !isSigningUp}}
+                        on:click={() => {isSigningUp = !isSigningUp; confirmSignOut = false;}}
                         class="{buttonClasses}"
                     >{isSigningUp ? "Sign in instead" : "Sign up instead"}</button>
                 </div>
                 <div class="flex flex-row mt-4">
                     <div class="flex items-center text-center pr-6">Forgot your password?</div>
                     <button
-                        on:click={() => {resetPassword()}}
+                        on:click={() => {resetPassword(); confirmSignOut = false;}}
                         class="{buttonClasses}"
                     >Reset password</button>
                 </div>

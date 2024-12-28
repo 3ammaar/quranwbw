@@ -170,7 +170,7 @@
 	</div>
 
 	{#if stage == 0 || stage == 1}
-	<div class="flex flex=row mt-6 mb-1">
+	<div class="flex flex-row mt-6 mb-1">
 		<button
 			on:click={() => {
 				if (stage == 0 && hiddenIndex <= data[verseKeys[2]].meta.words) {

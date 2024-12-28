@@ -47,7 +47,7 @@ export function dbSubscribe() {
           db.wordHifdhCard.where("[chapter+verse+word+last_updated]").equals([record.body.chapter, record.body.verse, record.body.word, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => console.log(error));
-      }});
+      }}).catch(() => false);
     },
     error: error => console.log(error)
   });
@@ -73,7 +73,7 @@ export function dbSubscribe() {
           db.userBookmark.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => console.log(error));
-      }});
+      }}).catch(() => false);
     },
     error: error => console.log(error)
   });
@@ -100,7 +100,7 @@ export function dbSubscribe() {
           db.userNote.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => console.log(error));
-      }});
+      }}).catch(() => false);
     },
     error: error => console.log(error)
   });
@@ -126,7 +126,7 @@ export function dbSubscribe() {
           db.userFavouriteChapter.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => console.log(error));
-      }});
+      }}).catch(() => false);
     },
     error: error => console.log(error)
   });
@@ -151,7 +151,7 @@ export function dbSubscribe() {
           db.userSetting.where("[name+last_updated]").equals([record.body.name, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => console.log(error));
-      }});
+      }}).catch(() => false);
     },
     error: error => console.log(error)
   });
@@ -300,24 +300,27 @@ export async function downSyncFromDate(date) {
   return success;
 }
 
+export async function downSync() {
+  if (!pb.authStore.isValid) return;
+
+  const health = await pb.health.check().catch(() => null);
+  if (health?.code != 200) return;
+
+  const beforeSync = new Date();
+  const lastDownSync = new Date(parseInt(localStorage.getItem("lastDownSync") ?? "-8640000000000000"));
+  
+  let success = await downSyncFromDate(lastDownSync);
+
+  if (success) {
+    localStorage.setItem("lastDownSync", beforeSync.getTime());
+  }
+}
+
 // Use setInterval() instead of subscriptions as missed subscriptions will need to be checked anyway,
 // and realtime downsyncs are unlikely to be important enough to the user.
 export function startDownSyncInterval() {
   setInterval(async () => {
-    if (!pb.authStore.isValid) return;
-
-    const health = await pb.health.check().catch(() => null);
-    if (health?.code != 200) return;
-
-    const beforeSync = new Date();
-    const lastDownSync = new Date(localStorage.getItem("lastDownSync")) ?? new Date(-8640000000000000);
-    
-    let success = await downSyncFromDate(lastDownSync);
-
-    if (success) {
-      localStorage.setItem("lastDownSync", beforeSync);
-    }
-
+    await downSync();
     await setUserSettings(false);
   }, 20000);
 }
