@@ -159,9 +159,14 @@ export function dbSubscribe() {
     error: error => console.log(error)
   });
 
+  let lastReadLastSynced = new Date();
   const userSettingUpSync = liveQuery(() => db.userSetting.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
+      if (result.length == 1 && result[0].name == "lastRead") {
+        if ((new Date() - lastReadLastSynced) <= 10000) return;
+        else lastReadLastSynced = new Date();
+      }
 
       pb.health.check().then(health => { if (health.code == 200) {
         const batch = pb.createBatch();
