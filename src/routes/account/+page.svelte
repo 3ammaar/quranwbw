@@ -10,7 +10,32 @@
     import { resetSettings } from '$utils/resetSettings';
     import { downSync } from '$utils/dbHooks';
     import { setUserSettings } from '$src/hooks.client';
+    import { liveQuery } from 'dexie';
 
+    $: unsyncedWordHifdhCardCount = liveQuery(async () => {
+		return await db.wordHifdhCard.where("synced").notEqual(1).count();
+    });
+
+    $: unsyncedUserSettingCount = liveQuery(async () => {
+		return await db.userSetting.where("synced").notEqual(1).count();
+    });
+
+    $: unsyncedUserBookmarkCount = liveQuery(async () => {
+		return await db.userBookmark.where("synced").notEqual(1).count();
+    });
+
+    $: unsyncedUserNoteCount = liveQuery(async () => {
+		return await db.userNote.where("synced").notEqual(1).count();
+    });
+
+    $: unsyncedUserFavouriteChapterCount = liveQuery(async () => {
+		return await db.userFavouriteChapter.where("synced").notEqual(1).count();
+    });
+
+
+    $: unsyncedCount = [$unsyncedWordHifdhCardCount, $unsyncedUserSettingCount,
+        $unsyncedUserBookmarkCount, $unsyncedUserNoteCount, $unsyncedUserFavouriteChapterCount]
+            .reduce((sum, count) => (sum == null || count == null) ? null : (sum + count), 0)
 
     //TODO improve error handling, including error message management and content - this page and sub-pages
     //TODO improve styling - this page and sub-pages
@@ -290,7 +315,12 @@
                     class="{buttonClasses} mt-4"
                 >Sign out</button>
                 {:else}
-                <h3 class="mt-4">Warning - signing out will delete unsynced changes.</h3>
+                <h3 class="mt-4">Are you sure you want to sign out?</h3>
+                {#if unsyncedCount ===  0}
+                <h3 class="mt-2">Your changes have been synced.</h3>
+                {:else}
+                <h3 class="mt-2">Warning - signing out will delete {unsyncedCount == null ? "" : (unsyncedCount + " ")}unsynced changes.</h3>
+                {/if}
                 <div class="flex flex-row mt-2">
                     <div class="w-full">
                         <button
