@@ -47,7 +47,7 @@ export function dbSubscribe() {
           db.wordHifdhCard.where("[chapter+verse+word+last_updated]").equals([record.body.chapter, record.body.verse, record.body.word, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => {
-          const collisions = error?.data?.collisions;
+          const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
             return;
@@ -80,7 +80,7 @@ export function dbSubscribe() {
           db.userBookmark.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => {
-          const collisions = error?.data?.collisions;
+          const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
             return;
@@ -147,7 +147,7 @@ export function dbSubscribe() {
           db.userFavouriteChapter.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => {
-          const collisions = error?.data?.collisions;
+          const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
             return;
@@ -179,7 +179,7 @@ export function dbSubscribe() {
           db.userSetting.where("[name+last_updated]").equals([record.body.name, toJSDate(record.body.last_updated)])
             .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
         })).catch(error => {
-          const collisions = error?.data?.collisions;
+          const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
             return;
