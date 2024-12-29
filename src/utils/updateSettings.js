@@ -163,6 +163,7 @@ export function updateSettings(props) {
 		// for playback speed
 		case 'playbackSpeed':
 			__playbackSpeed.set(props.value);
+			if (props.skipSave) return;
 			userSettings.audioSettings.playbackSpeed = props.value;
 			updateDBSetting("audioSettings.playbackSpeed", props.value);
 			break;
@@ -407,6 +408,8 @@ export function updateSettings(props) {
 
 			// update it in localSettings
 			userSettings.displaySettings.fontSizes[`${props.type}`] = newSize;
+
+			if (props.skipSave) return;
 			updateDBSetting(`displaySettings.fontSizes.${props.type}`, newSize);
 
 			break;

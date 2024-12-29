@@ -111,7 +111,7 @@
 		} else {
 			const userSettings = JSON.parse($__userSettings);
 
-			updateSettings({ type: 'displayType', value: userSettings.displaySettings.displayType });
+			updateSettings({ type: 'displayType', value: userSettings.displaySettings.displayType, skipSave: true });
 			__selectedDisplayId.set(userSettings.displaySettings.displayType);
 
 			__fontType.set(userSettings.displaySettings.fontType);
