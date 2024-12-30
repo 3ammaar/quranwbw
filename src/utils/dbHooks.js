@@ -39,6 +39,7 @@ export function dbSubscribe() {
             "stability": record.stability,
             "state": record.state,
             "last_updated": record.last_updated,
+            "interval": record.interval,
             ...(record.pocketbase_id && {id: record.pocketbase_id})
           });
         }
