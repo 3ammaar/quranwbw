@@ -223,7 +223,7 @@
         db.userBookmark.clear();
         db.userNote.clear();
         db.userFavouriteChapter.clear();
-        localStorage.setItem("lastDownSync", "-8640000000000000");
+        localStorage.removeItem("lastDownSync");
     }
 
 	__currentPage.set('account');

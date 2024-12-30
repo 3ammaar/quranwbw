@@ -68,7 +68,9 @@ let __websiteOnline,
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
 	__learnMode,
-	__pbAuth;
+	__pbAuth,
+	__syncErrorNotificationVisible,
+	__syncLoadingStates;
 
 if (browser) {
 	
@@ -262,6 +264,10 @@ export function initialiseUserSettingsStores(userSettings) {
 
 	// show/hide non-dua words
 	__hideNonDuaPart = writable(userSettings.displaySettings.hideNonDuaPart);
+
+	__syncErrorNotificationVisible = writable(false);
+
+	__syncLoadingStates = writable ({});
 }
 
 export function setUserSettingsStores(userSettings) {
@@ -407,5 +413,7 @@ export {
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
 	__learnMode,
-	__pbAuth
+	__pbAuth,
+	__syncErrorNotificationVisible,
+	__syncLoadingStates
 };

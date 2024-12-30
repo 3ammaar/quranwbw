@@ -1,7 +1,7 @@
 import { db } from '$utils/dexieDB';
 import { liveQuery } from 'dexie';
 import { pb } from '$utils/pocketBaseDB';
-import { __pbAuth } from '$utils/stores';
+import { __pbAuth, __syncErrorNotificationVisible, __syncLoadingStates } from '$utils/stores';
 import { setUserSettings } from '$src/hooks.client';
 
 export function dbSubscribe() {
@@ -15,13 +15,17 @@ export function dbSubscribe() {
         });
       __pbAuth.set(pb.authStore);
     });
-  }}).catch(error => console.log(error));
+  }}).catch(error => {
+    console.log(error);
+    __syncErrorNotificationVisible.set(true);
+  });
 
   const wordHifdhCardUpSync = liveQuery(() => db.wordHifdhCard.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
-      
       pb.health.check().then(health => { if (health.code == 200) {
+        __syncLoadingStates.update(current => ({...current, "wordHifdhCardUpSync": true}));
+
         const batch = pb.createBatch();
         for (const record of result) {
           batch.collection("wordHifdhCard").upsert({
@@ -46,16 +50,28 @@ export function dbSubscribe() {
 
         batch.send().then(result => result.forEach(record => {
           db.wordHifdhCard.where("[chapter+verse+word+last_updated]").equals([record.body.chapter, record.body.verse, record.body.word, toJSDate(record.body.last_updated)])
-            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => {
+              console.log(error);
+              __syncErrorNotificationVisible.set(true);
+            });
         })).catch(error => {
           const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
+            __syncErrorNotificationVisible.set(true);
             return;
           }
           putCollisions(collisions);
         });
-      }}).catch(() => false);
+
+        __syncLoadingStates.update(current => {
+          const {wordHifdhCardUpSync: _, ...rest} = current;
+          return rest;
+        });
+      }}).catch(error => {
+        console.log(error);
+        __syncErrorNotificationVisible.set(true);
+      });
     },
     error: error => console.log(error)
   });
@@ -65,6 +81,8 @@ export function dbSubscribe() {
       if (!pb.authStore.isValid || !result?.length) return;
 
       pb.health.check().then(health => { if (health.code == 200) {
+        __syncLoadingStates.update(current => ({...current, "userBookmarkUpSync": true}));
+
         const batch = pb.createBatch();
         for (const record of result) {
           batch.collection("userBookmark").upsert({
@@ -79,16 +97,28 @@ export function dbSubscribe() {
 
         batch.send().then(result => result.forEach(record => {
           db.userBookmark.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
-            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => {
+              console.log(error);
+              __syncErrorNotificationVisible.set(true);
+            });
         })).catch(error => {
           const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
+            __syncErrorNotificationVisible.set(true);
             return;
           }
           putCollisions(collisions);
         });
-      }}).catch(() => false);
+
+        __syncLoadingStates.update(current => {
+          const {userBookmarkUpSync: _, ...rest} = current;
+          return rest;
+        });
+      }}).catch(error => {
+        console.log(error);
+        __syncErrorNotificationVisible.set(true);
+      });
     },
     error: error => console.log(error)
   });
@@ -98,6 +128,8 @@ export function dbSubscribe() {
       if (!pb.authStore.isValid || !result?.length) return;
 
       pb.health.check().then(health => { if (health.code == 200) {
+        __syncLoadingStates.update(current => ({...current, "userNoteUpSync": true}));
+
         const batch = pb.createBatch();
         for (const record of result) {
           batch.collection("userNote").upsert({
@@ -113,16 +145,28 @@ export function dbSubscribe() {
 
         batch.send().then(result => result.forEach(record => {
           db.userNote.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
-            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => {
+              console.log(error);
+              __syncErrorNotificationVisible.set(true);
+            });
         })).catch(error => {
           const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
+            __syncErrorNotificationVisible.set(true);
             return;
           }
           putCollisions(collisions);
         });
-      }}).catch(() => false);
+
+        __syncLoadingStates.update(current => {
+          const {userNoteUpSync: _, ...rest} = current;
+          return rest;
+        });
+      }}).catch(error => {
+        console.log(error);
+        __syncErrorNotificationVisible.set(true);
+      });
     },
     error: error => console.log(error)
   });
@@ -132,6 +176,8 @@ export function dbSubscribe() {
       if (!pb.authStore.isValid || !result?.length) return;
 
       pb.health.check().then(health => { if (health.code == 200) {
+        __syncLoadingStates.update(current => ({...current, "userFavouriteChapterUpSync": true}));
+
         const batch = pb.createBatch();
         for (const record of result) {
           batch.collection("userFavouriteChapter").upsert({
@@ -146,16 +192,28 @@ export function dbSubscribe() {
 
         batch.send().then(result => result.forEach(record => {
           db.userFavouriteChapter.where("[chapter+verse+last_updated]").equals([record.body.chapter, record.body.verse, toJSDate(record.body.last_updated)])
-            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => {
+              console.log(error);
+              __syncErrorNotificationVisible.set(true);
+            });
         })).catch(error => {
           const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
+            __syncErrorNotificationVisible.set(true);
             return;
           }
           putCollisions(collisions);
         });
-      }}).catch(() => false);
+
+        __syncLoadingStates.update(current => {
+          const {userFavouriteChapterUpSync: _, ...rest} = current;
+          return rest;
+        });
+      }}).catch(error => {
+        console.log(error);
+        __syncErrorNotificationVisible.set(true);
+      });
     },
     error: error => console.log(error)
   });
@@ -170,6 +228,10 @@ export function dbSubscribe() {
       }
 
       pb.health.check().then(health => { if (health.code == 200) {
+        if (result.length != 1 || result[0].name != "lastRead") {
+          __syncLoadingStates.update(current => ({...current, "userSettingUpSync": true}));
+        }
+
         const batch = pb.createBatch();
         for (const record of result) {
           batch.collection("userSetting").upsert({
@@ -183,16 +245,28 @@ export function dbSubscribe() {
 
         batch.send().then(result => result.forEach(record => {
           db.userSetting.where("[name+last_updated]").equals([record.body.name, toJSDate(record.body.last_updated)])
-            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => console.log(error));
+            .modify({synced: 1, pocketbase_id: record.body.id}).catch(error => {
+              console.log(error);
+              __syncErrorNotificationVisible.set(true);
+            });
         })).catch(error => {
           const collisions = error?.data?.data?.collisions;
           if (!collisions) {
             console.log(error);
+            __syncErrorNotificationVisible.set(true);
             return;
           }
           putCollisions(collisions);
         });
-      }}).catch(() => false);
+
+        __syncLoadingStates.update(current => {
+          const {userSettingUpSync: _, ...rest} = current;
+          return rest;
+        });
+      }}).catch(error => {
+        console.log(error);
+        __syncErrorNotificationVisible.set(true);
+      });
     },
     error: error => console.log(error)
   });
@@ -230,18 +304,21 @@ function putIfNotSooner(tableName, key, newRecord) {
     if (!existing || existing.last_updated <= newRecord.last_updated) {
       return db.table(tableName).put(newRecord).then(() => true).catch(error => {
         console.log(error);
+        __syncErrorNotificationVisible.set(true);
         return false;
       });
     } else if (existing) {
       return db.table(tableName).update(key, {pocketbase_id: newRecord.pocketbase_id, synced: 0})
         .then(() => true).catch(error => {
           console.log(error);
+          __syncErrorNotificationVisible.set(true);
           return false;
         });
     }
     return true;
   }).catch(error => {
     console.log(error);
+    __syncErrorNotificationVisible.set(true);
     return false;
   });
 }
@@ -275,6 +352,7 @@ async function putWordHifdhCardRecords(wordHifdhCardRecords, soonerCheck = false
     ) && success;
     else success = await db.wordHifdhCard.put(newRecord).then(() => true).catch(error => {
       console.log(error);
+      __syncErrorNotificationVisible.set(true);
       return false;
     }) && success;
   }
@@ -300,6 +378,7 @@ async function putUserBookmarkRecords(userBookmarkRecords, soonerCheck = false) 
     ) && success;
     else success = await db.userBookmark.put(newRecord).then(() => true).catch(error => {
       console.log(error);
+      __syncErrorNotificationVisible.set(true);
       return false;
     }) && success;
   }
@@ -326,6 +405,7 @@ async function putUserNoteRecords(userNoteRecords, soonerCheck = false) {
     ) && success;
     else success = await db.userNote.put(newRecord).then(() => true).catch(error => {
       console.log(error);
+      __syncErrorNotificationVisible.set(true);
       return false;
     }) && success;
   }
@@ -351,6 +431,7 @@ async function putUserFavouriteChapterRecords(userFavouriteChapterRecords, soone
     ) && success;
     else success = await db.userFavouriteChapter.put(newRecord).then(() => true).catch(error => {
       console.log(error);
+      __syncErrorNotificationVisible.set(true);
       return false;
     }) && success;
   }
@@ -375,6 +456,7 @@ async function putUserSettingRecords(userSettingRecords, soonerCheck = false) {
     ) && success;
     else success = await db.userSetting.put(newRecord).then(() => true).catch(error => {
       console.log(error);
+      __syncErrorNotificationVisible.set(true);
       return false;
     }) && success;
   }
@@ -388,51 +470,91 @@ export async function downSyncFromDate(date) {
     filter: `last_updated > "${toPBDate(date)}"`
   }).catch(error => {
     console.log(error);
+    __syncErrorNotificationVisible.set(true);
     success = false;
     return [];
   });
 
-  success = (await putWordHifdhCardRecords(wordHifdhCardRecords)) && success;
+  if (wordHifdhCardRecords && wordHifdhCardRecords.length) {
+    __syncLoadingStates.update(current => ({...current, "wordHifdhCardDownSync": true}));
+    success = (await putWordHifdhCardRecords(wordHifdhCardRecords)) && success;
+    __syncLoadingStates.update(current => {
+      const {wordHifdhCardDownSync: _, ...rest} = current;
+      return rest;
+    });
+  }
 
   const userBookmarkRecords = await pb.collection("userBookmark").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
   }).catch(error => {
     console.log(error);
+    __syncErrorNotificationVisible.set(true);
     success = false;
     return [];
   });
-
-  success = (await putUserBookmarkRecords(userBookmarkRecords)) && success;
+  
+  if (userBookmarkRecords && userBookmarkRecords.length) {
+    __syncLoadingStates.update(current => ({...current, "userBookmarkDownSync": true}));
+    success = (await putUserBookmarkRecords(userBookmarkRecords)) && success;
+    __syncLoadingStates.update(current => {
+      const {userBookmarkDownSync: _, ...rest} = current;
+      return rest;
+    });
+  }
 
   const userNoteRecords = await pb.collection("userNote").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
   }).catch(error => {
     console.log(error);
+    __syncErrorNotificationVisible.set(true);
     success = false;
     return [];
   });
 
-  success = (await putUserNoteRecords(userNoteRecords)) && success;
+  if (userNoteRecords && userNoteRecords.length) {
+    __syncLoadingStates.update(current => ({...current, "userNoteDownSync": true}));
+    success = (await putUserNoteRecords(userNoteRecords)) && success;
+    __syncLoadingStates.update(current => {
+      const {userNoteDownSync: _, ...rest} = current;
+      return rest;
+    });
+  }
 
   const userFavouriteChapterRecords = await pb.collection("userFavouriteChapter").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
   }).catch(error => {
     console.log(error);
+    __syncErrorNotificationVisible.set(true);
     success = false;
     return [];
   });
 
-  success = (await putUserFavouriteChapterRecords(userFavouriteChapterRecords)) && success;
+  if (userFavouriteChapterRecords && userFavouriteChapterRecords.length) {
+    __syncLoadingStates.update(current => ({...current, "userFavouriteChapterDownSync": true}));
+    success = (await putUserFavouriteChapterRecords(userFavouriteChapterRecords)) && success;
+    __syncLoadingStates.update(current => {
+      const {userFavouriteChapterDownSync: _, ...rest} = current;
+      return rest;
+    });
+  }
 
   const userSettingRecords = await pb.collection("userSetting").getFullList({
     filter: `last_updated > "${toPBDate(date)}"`
   }).catch(error => {
     console.log(error);
+    __syncErrorNotificationVisible.set(true);
     success = false;
     return [];
   });
 
-  success = (await putUserSettingRecords(userSettingRecords)) && success;
+  if (userSettingRecords && userSettingRecords.length) {
+    __syncLoadingStates.update(current => ({...current, "userSettingDownSync": true}));
+    success = (await putUserSettingRecords(userSettingRecords)) && success;
+    __syncLoadingStates.update(current => {
+      const {userSettingDownSync: _, ...rest} = current;
+      return rest;
+    });
+  }
 
   return success;
 }
@@ -440,11 +562,17 @@ export async function downSyncFromDate(date) {
 export async function downSync() {
   if (!pb.authStore.isValid) return;
 
-  const health = await pb.health.check().catch(() => null);
-  if (health?.code != 200) return;
+  const health = await pb.health.check().catch(error => {
+    console.log(error);
+    __syncErrorNotificationVisible.set(true);
+  });
+  if (health?.code != 200) {
+    __syncErrorNotificationVisible.set(true);
+    return;
+  };
 
   const beforeSync = new Date();
-  const lastDownSync = new Date(parseInt(localStorage.getItem("lastDownSync") ?? "-8640000000000000"));
+  const lastDownSync = new Date(parseInt(localStorage.getItem("lastDownSync") ?? "949363200000"));
   
   let success = await downSyncFromDate(lastDownSync);
 

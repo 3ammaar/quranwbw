@@ -1113,6 +1113,10 @@ input[type="range"].range-lg::-moz-range-thumb {
   top: 0px;
 }
 
+.top-2\.5 {
+  top: 0.625rem;
+}
+
 .top-3 {
   top: 0.75rem;
 }
@@ -1665,8 +1669,16 @@ input[type="range"].range-lg::-moz-range-thumb {
   flex-grow: 1;
 }
 
+.flex-grow-0 {
+  flex-grow: 0;
+}
+
 .basis-1\/2 {
   flex-basis: 50%;
+}
+
+.basis-auto {
+  flex-basis: auto;
 }
 
 .-translate-x-1\/2 {
@@ -2692,6 +2704,10 @@ input[type="range"].range-lg::-moz-range-thumb {
   padding-right: 1.5rem;
 }
 
+.pr-7 {
+  padding-right: 1.75rem;
+}
+
 .ps-10 {
   padding-inline-start: 2.5rem;
 }
@@ -2730,6 +2746,10 @@ input[type="range"].range-lg::-moz-range-thumb {
 
 .pt-28 {
   padding-top: 7rem;
+}
+
+.pt-3 {
+  padding-top: 0.5rem;
 }
 
 .pt-4 {
@@ -4439,4 +4459,16 @@ svg {
 .\[\&\:\:-webkit-slider-thumb\]\:\!bg-\[\#dddddd\]::-webkit-slider-thumb {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(221 221 221 / var(--tw-bg-opacity)) !important;
+}
+
+.bg-error {
+  background-color: red;
+}
+
+.bg-info {
+  background-color: #2563eb;
+}
+
+.bg-success {
+  background-color: green;
 }
