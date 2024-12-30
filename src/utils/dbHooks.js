@@ -246,6 +246,7 @@ function putIfNotSooner(tableName, key, newRecord) {
 }
 
 async function putWordHifdhCardRecords(wordHifdhCardRecords, soonerCheck = false) {
+  let success = true;
   for (const record of wordHifdhCardRecords) {
     const newRecord = {
       chapter: record.chapter,
@@ -266,19 +267,21 @@ async function putWordHifdhCardRecords(wordHifdhCardRecords, soonerCheck = false
       pocketbase_id: record.id
     };
 
-    if (soonerCheck) return await putIfNotSooner(
+    if (soonerCheck) success = await putIfNotSooner(
       "wordHifdhCard", 
       {chapter: record.chapter, verse: record.verse, word: record.word}, 
       newRecord
-    );
-    else return await db.wordHifdhCard.put(newRecord).then(() => true).catch(error => {
+    ) && success;
+    else success = await db.wordHifdhCard.put(newRecord).then(() => true).catch(error => {
       console.log(error);
       return false;
-    });
+    }) && success;
   }
+  return success;
 }
 
 async function putUserBookmarkRecords(userBookmarkRecords, soonerCheck = false) {
+  let success = true;
   for (const record of userBookmarkRecords) {
     const newRecord = {
       chapter: record.chapter,
@@ -289,19 +292,21 @@ async function putUserBookmarkRecords(userBookmarkRecords, soonerCheck = false) 
       pocketbase_id: record.id
     }
 
-    if (soonerCheck) return await putIfNotSooner(
+    if (soonerCheck) success = await putIfNotSooner(
       "userBookmark",
       {chapter: record.chapter, verse: record.verse},
       newRecord
-    );
-    else return await db.userBookmark.put(newRecord).then(() => true).catch(error => {
+    ) && success;
+    else success = await db.userBookmark.put(newRecord).then(() => true).catch(error => {
       console.log(error);
       return false;
-    });
+    }) && success;
   }
+  return success;
 }
 
 async function putUserNoteRecords(userNoteRecords, soonerCheck = false) {
+  let success = true;
   for (const record of userNoteRecords) {
     const newRecord = {
       chapter: record.chapter,
@@ -313,19 +318,21 @@ async function putUserNoteRecords(userNoteRecords, soonerCheck = false) {
       pocketbase_id: record.id
     }
 
-    if (soonerCheck) return await putIfNotSooner(
+    if (soonerCheck) success = await putIfNotSooner(
       "userNote",
       {chapter: record.chapter, verse: record.verse},
       newRecord
-    );
-    else return await db.userNote.put(newRecord).then(() => true).catch(error => {
+    ) && success;
+    else success = await db.userNote.put(newRecord).then(() => true).catch(error => {
       console.log(error);
       return false;
-    });
+    }) && success;
   }
+  return success;
 }
 
 async function putUserFavouriteChapterRecords(userFavouriteChapterRecords, soonerCheck = false) {
+  let success = true;
   for (const record of userFavouriteChapterRecords) {
     const newRecord = {
       chapter: record.chapter,
@@ -336,19 +343,21 @@ async function putUserFavouriteChapterRecords(userFavouriteChapterRecords, soone
       pocketbase_id: record.id
     }
 
-    if (soonerCheck) return await putIfNotSooner(
+    if (soonerCheck) success = await putIfNotSooner(
       "userFavouriteChapter",
       {chapter: record.chapter, verse: record.verse},
       newRecord
-    );
-    else return await db.userFavouriteChapter.put(newRecord).then(() => true).catch(error => {
+    ) && success;
+    else success = await db.userFavouriteChapter.put(newRecord).then(() => true).catch(error => {
       console.log(error);
       return false;
-    });
+    }) && success;
   }
+  return success;
 }
 
 async function putUserSettingRecords(userSettingRecords, soonerCheck = false) {
+  let success = true;
   for (const record of userSettingRecords) {
     const newRecord = {
       name: record.name,
@@ -358,16 +367,17 @@ async function putUserSettingRecords(userSettingRecords, soonerCheck = false) {
       pocketbase_id: record.id
     }
 
-    if (soonerCheck) return await putIfNotSooner(
+    if (soonerCheck) success = await putIfNotSooner(
       "userSetting",
       {name: record.name},
       newRecord
-    );
-    else return await db.userSetting.put(newRecord).then(() => true).catch(error => {
+    ) && success;
+    else success = await db.userSetting.put(newRecord).then(() => true).catch(error => {
       console.log(error);
       return false;
-    });
+    }) && success;
   }
+  return success;
 }
 
 export async function downSyncFromDate(date) {
