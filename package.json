@@ -39,6 +39,7 @@
 		"dragdroptouch-bug-fixed": "^1.0.8",
 		"party-js": "^2.2.0",
 		"patch-package": "^8.0.0",
+		"pocketbase": "^0.24.0",
 		"svelte-drag-drop-touch": "^0.1.9",
 		"svelte-gestures": "^5.0.4",
 		"svelte-inview": "^4.0.2",

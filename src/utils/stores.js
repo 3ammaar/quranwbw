@@ -1,5 +1,7 @@
 import { browser } from '$app/environment';
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
+import { pb } from '$utils/pocketBaseDB'
+
 
 let __websiteOnline,
 	__currentPage,
@@ -65,7 +67,10 @@ let __websiteOnline,
 	__wordRoot,
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
-	__learnMode;
+	__learnMode,
+	__pbAuth,
+	__syncErrorNotificationVisible,
+	__syncLoadingStates;
 
 if (browser) {
 	
@@ -183,6 +188,9 @@ if (browser) {
 
 	// used to indicate whether to just review past cards or to also learn new cards, or neither
 	__learnMode = writable(null);
+
+	// PocketBase AuthStore
+	__pbAuth = writable(pb.authStore);
 }
 
 export function initialiseUserSettingsStores(userSettings) {
@@ -256,78 +264,86 @@ export function initialiseUserSettingsStores(userSettings) {
 
 	// show/hide non-dua words
 	__hideNonDuaPart = writable(userSettings.displaySettings.hideNonDuaPart);
+
+	__syncErrorNotificationVisible = writable(false);
+
+	__syncLoadingStates = writable ({});
 }
 
 export function setUserSettingsStores(userSettings) {
 	// to store the local user settings from LocalStorage
 	__userSettings.set(JSON.stringify(userSettings));
 
-	// to store the user notes
+	// // to store the user notes
 	__userNotes.set(userSettings.userNotes);
 
-	// to store the user bookmarks
+	// // to store the user bookmarks
 	__userBookmarks.set(userSettings.userBookmarks);
 
-	// to store the font type - Uthmani, IndoPak, etc...
+	// // to store the font type - Uthmani, IndoPak, etc...
 	__fontType.set(userSettings.displaySettings.fontType);
 
-	// to store the word translation
+	// // to store the word translation
 	__wordTranslation.set(userSettings.translations.word);
 
-	// to store the word transliteration
+	// // to store the word transliteration
 	__wordTransliteration.set(userSettings.transliteration.word);
 
-	// to store the verse translations
-	__verseTranslations.set(userSettings.translations.verse_v1);
-
-	// to store the verse tafisr
+	// // to store the verse translations
+	const currentTranslations = get(__verseTranslations) ?? [];
+	if (currentTranslations.length != userSettings.translations.verse_v1.length
+		|| !currentTranslations.every(value => userSettings.translations.verse_v1.includes(value))) {
+			__verseTranslations.set(userSettings.translations.verse_v1);
+		}
+	
+	// // to store the verse tafisr
 	__verseTafsir.set(userSettings.translations.tafsir);
 
-	// to store the word translation toggle
+	// // to store the word translation toggle
 	__wordTranslationEnabled.set(userSettings.displaySettings.wordTranslationEnabled);
 
-	// to store the word transliteration toggle
+	// // to store the word transliteration toggle
 	__wordTransliterationEnabled.set(userSettings.displaySettings.wordTransliterationEnabled);
 
-	// to store reciter
+	// // to store reciter
 	__reciter.set(userSettings.audioSettings.reciter);
 	__translationReciter.set(userSettings.audioSettings.translationReciter);
 	
-	// to store playback speed
+	// // to store playback speed
 	__playbackSpeed.set(userSettings.audioSettings.playbackSpeed);
 
-	// to store the toggle boolean for play translation
+	// // to store the toggle boolean for play translation
 	__playTranslation.set(userSettings.audioSettings.playTranslation);
 
-	// to store the display type - WBW, Normal, Continuous, etc...
+	// // to store the display type - WBW, Normal, Continuous, etc...
 	__displayType.set(userSettings.displaySettings.displayType);
 
-	// to store the website theme
+	// // to store the website theme
 	__websiteTheme.set(userSettings.displaySettings.websiteTheme);
 
-	// to store the last read key
+	// // to store the last read key
 	__lastRead.set(userSettings.lastRead);
 
-	// to store the user's favourite chapters
+	// // to store the user's favourite chapters
 	__favouriteChapters.set(userSettings.favouriteChapters);
 
-	// to store the word tooltip type
+	// // to store the word tooltip type
 	__wordTooltip.set(userSettings.displaySettings.wordTooltip);
 
-	// to store the auto scroll speed
+	// // to store the auto scroll speed
 	__autoScrollSpeed.set(userSettings.displaySettings.autoScrollSpeed);
 
-	// wake lock settings
+	// // wake lock settings
 	__wakeLockEnabled.set(userSettings.displaySettings.wakeLockEnabled);
 
-	// quiz settings
+	// // quiz settings
 	__quizCorrectAnswers.set(userSettings.quiz.correctAnswers);
 	__quizWrongAnswers.set(userSettings.quiz.wrongAnswers);
 
-	// english/arabic Quranic terms
+	// // english/arabic Quranic terms
 	__englishTerminology.set(userSettings.displaySettings.englishTerminology);
 
-	// show/hide non-dua words
+	// // show/hide non-dua words
 	__hideNonDuaPart.set(userSettings.displaySettings.hideNonDuaPart);
 }
 
@@ -397,4 +413,7 @@ export {
 	__playButtonsFunctionality,
 	__mushafMinimalModeEnabled,
 	__learnMode,
+	__pbAuth,
+	__syncErrorNotificationVisible,
+	__syncLoadingStates
 };

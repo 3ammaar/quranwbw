@@ -17,6 +17,7 @@
 	import VerseTranslationModal from '$ui/Modals/VerseTranslationModal.svelte';
 	import MorphologyModal from '$ui/Modals/MorphologyModal.svelte';
 	import LearnModal from '$ui/Modals/LearnModal.svelte';
+	import Notification from '$ui/Notification.svelte';
 
 	import { __websiteOnline, __currentPage, __chapterNumber, __settingsDrawerHidden, __wakeLockEnabled, __userToken, __fontType, __wordTranslation, __verseTranslations, __selectedDisplayId, __mushafMinimalModeEnabled, __topNavbarVisible, __bottomToolbarVisible, __userSettings } from '$utils/stores';
 	import { checkOldBookmarks } from '$utils/checkOldBookmarks';
@@ -111,7 +112,7 @@
 		} else {
 			const userSettings = JSON.parse($__userSettings);
 
-			updateSettings({ type: 'displayType', value: userSettings.displaySettings.displayType });
+			updateSettings({ type: 'displayType', value: userSettings.displaySettings.displayType, skipSave: true });
 			__selectedDisplayId.set(userSettings.displaySettings.displayType);
 
 			__fontType.set(userSettings.displaySettings.fontType);
@@ -159,6 +160,7 @@
 	<VerseTranslationModal />
 	<MorphologyModal />
 	<LearnModal />
+	<Notification />
 	<BottomToolbar />
 	<slot />
 </div>

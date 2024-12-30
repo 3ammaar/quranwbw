@@ -6,9 +6,9 @@ export async function resetSettings() {
 
 	// Remove current settings from localStorage, DB and global stores
 	localStorage.removeItem('userSettings');
-	db.userSettings.where("name").notEqual("lastRead").delete();
-	db.userVerseTranslationsSettings.clear();
-	db.favouriteChapters.clear();
+	const now = new Date();
+	db.userSetting.where("name").notEqual("lastRead").modify({value: null, last_updated: now, synced: 0});
+	db.userFavouriteChapter.where("enabled").equals(1).modify({enabled: 0, last_updated: now, synced: 0});
 
 	// Get default user settings and set them in global stores
 	let userSettings = await getUserSettingsOrDefaultFromDB();

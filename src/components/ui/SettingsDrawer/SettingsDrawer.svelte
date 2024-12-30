@@ -98,11 +98,16 @@
 	let verseTranlationTransliterationSizeValue = fontSizePresets.indexOf(JSON.parse($__userSettings).displaySettings.fontSizes.verseTranslationText);
 	let playbackSpeedValue = JSON.parse($__userSettings).audioSettings.playbackSpeed;
 
+	let arabicWordSizeValueChanged = false;
+	let wordTranlationTransliterationSizeValueChanged = false;
+	let verseTranlationTransliterationSizeValueChanged = false;
+	let playbackSpeedValueChanged = false;
+
 	// Update settings when sliders are changed
-	$: updateSettings({ type: 'arabicText', value: selectableFontSizes[arabicWordSizeValue].value });
-	$: updateSettings({ type: 'wordTranslationText', value: selectableFontSizes[wordTranlationTransliterationSizeValue].value });
-	$: updateSettings({ type: 'verseTranslationText', value: selectableFontSizes[verseTranlationTransliterationSizeValue].value });
-	$: updateSettings({ type: 'playbackSpeed', value: playbackSpeedValue });
+	$: updateSettings({ type: 'arabicText', value: selectableFontSizes[arabicWordSizeValue].value, skipSave: !arabicWordSizeValueChanged });
+	$: updateSettings({ type: 'wordTranslationText', value: selectableFontSizes[wordTranlationTransliterationSizeValue].value, skipSave: !wordTranlationTransliterationSizeValueChanged });
+	$: updateSettings({ type: 'verseTranslationText', value: selectableFontSizes[verseTranlationTransliterationSizeValue].value, skipSave: !verseTranlationTransliterationSizeValueChanged });
+	$: updateSettings({ type: 'playbackSpeed', value: playbackSpeedValue, skipSave: !playbackSpeedValueChanged });
 
 	// Calculate maximum allowed font size based on breakpoint
 	$: maxFontSizeAllowed = ['default', 'sm'].includes(getTailwindBreakpoint()) ? 9 : 12;
@@ -308,7 +313,7 @@
 							<span class="block">Arabic Word Size ({selectableFontSizes[arabicWordSizeValue].value.split('-')[1]})</span>
 							<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 							<div class="flex flex-col space-y-2 rounded-3xl w-full" role="group" on:mouseenter={() => onMouseEnter('arabic-word-size-setting')} on:mouseleave={() => onMouseLeave()}>
-								<Range min="1" max={maxFontSizeAllowed} bind:value={arabicWordSizeValue} class={rangeClasses} />
+								<Range min="1" max={maxFontSizeAllowed} bind:value={arabicWordSizeValue} on:change={() => arabicWordSizeValueChanged = true} class={rangeClasses} />
 							</div>
 						</div>
 					</div>
@@ -321,7 +326,7 @@
 							<span class="block">Word Translation/Transliteration Size ({selectableFontSizes[wordTranlationTransliterationSizeValue].value.split('-')[1]})</span>
 							<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 							<div class="flex flex-col space-y-2 rounded-3xl w-full" role="group" on:mouseenter={() => onMouseEnter('word-translation-size-setting')} on:mouseleave={() => onMouseLeave()}>
-								<Range min="1" max={maxFontSizeAllowed} bind:value={wordTranlationTransliterationSizeValue} class={rangeClasses} />
+								<Range min="1" max={maxFontSizeAllowed} bind:value={wordTranlationTransliterationSizeValue} on:change={() => wordTranlationTransliterationSizeValueChanged = true} class={rangeClasses} />
 							</div>
 						</div>
 					</div>
@@ -334,7 +339,7 @@
 							<span class="block">{term('verse')} Translation/Transliteration Size ({selectableFontSizes[verseTranlationTransliterationSizeValue].value.split('-')[1]})</span>
 							<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 							<div class="flex flex-col space-y-2 rounded-3xl w-full" role="group" on:mouseenter={() => onMouseEnter('verse-translation-size-setting')} on:mouseleave={() => onMouseLeave()}>
-								<Range min="1" max={maxFontSizeAllowed} bind:value={verseTranlationTransliterationSizeValue} class={rangeClasses} />
+								<Range min="1" max={maxFontSizeAllowed} bind:value={verseTranlationTransliterationSizeValue} on:change={() => verseTranlationTransliterationSizeValueChanged = true} class={rangeClasses} />
 							</div>
 						</div>
 					</div>
@@ -433,7 +438,7 @@
 						<div class="flex flex-col justify-between space-y-4">
 							<span class="block">Playback Speed ({selectablePlaybackSpeeds[playbackSpeedValue].speed})</span>
 							<div class="flex flex-col space-y-2 rounded-3xl w-full" role="group">
-								<Range min="1" max="7" bind:value={playbackSpeedValue} class={rangeClasses} />
+								<Range min="1" max="7" bind:value={playbackSpeedValue} on:change={() => playbackSpeedValueChanged = true} class={rangeClasses} />
 							</div>
 						</div>
 					</div>
