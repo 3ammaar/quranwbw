@@ -2,6 +2,7 @@
     import { flip } from "svelte/animate";
     import { fly } from "svelte/transition";
     import { __syncErrorNotificationVisible, __syncLoadingStates } from '$utils/stores';
+    import { pb } from '$utils/pocketBaseDB';
 	import CloseButton from '$ui/FlowbiteSvelte/utils/CloseButton.svelte';
 
     let isSyncing = false;
@@ -34,6 +35,7 @@
                     showSync = false;
                     if (wasSynced) {
                         showSuccess = true;
+                        __syncErrorNotificationVisible.set(false);
                         setTimeout(() => {
                             showSuccess = false;
                         }, 3000);
@@ -45,12 +47,14 @@
 
     $: {
         const visibleNotifications = [];
-        if ($__syncErrorNotificationVisible && !errorDismissed) {
-            visibleNotifications.push({type: "error", message: "Syncing error - check your network connection and refresh the page to try again."})
-        } else if (showSync && !syncDismissed) {
-            visibleNotifications.push({type: "info", message: "Syncing..."});
-        } else if (showSuccess && !successDismissed) {
-            visibleNotifications.push({type: "success", message: "Synced successfully."})
+        if (pb.authStore?.isValid) {
+            if ($__syncErrorNotificationVisible && !errorDismissed) {
+                visibleNotifications.push({type: "error", message: "Syncing error - check your network connection and refresh the page to try again."})
+            } else if (showSync && !syncDismissed) {
+                visibleNotifications.push({type: "info", message: "Syncing..."});
+            } else if (showSuccess && !successDismissed) {
+                visibleNotifications.push({type: "success", message: "Synced successfully."})
+            }
         }
         notifications = visibleNotifications;
     }
