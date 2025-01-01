@@ -210,7 +210,7 @@ export async function getUserSettingsOrDefaultFromDB() {
 	userSettings.displaySettings.websiteTheme = dbUserSettings["displaySettings.websiteTheme"] ?? 1; // Gold
 	userSettings.displaySettings.displayType = dbUserSettings["displaySettings.displayType"] ?? 1; // WBW
 	userSettings.displaySettings.fontType = dbUserSettings["displaySettings.fontType"] ?? 1; // Uthmanic Hafs Digital
-	userSettings.displaySettings.wordTranslationEnabled = !!(dbUserSettings["displaySettings.fontType"] ?? true); // Shown
+	userSettings.displaySettings.wordTranslationEnabled = !!(dbUserSettings["displaySettings.wordTranslationEnabled"] ?? true); // Shown
 	userSettings.displaySettings.wordTransliterationEnabled = !!(dbUserSettings["displaySettings.wordTransliterationEnabled"] ?? true); // Shown
 	userSettings.displaySettings.wordTooltip = dbUserSettings["displaySettings.wordTooltip"] ?? 1; // None
 	userSettings.displaySettings.autoScrollSpeed = dbUserSettings["displaySettings.autoScrollSpeed"] ?? 40; // x1
@@ -245,7 +245,7 @@ export async function getUserSettingsOrDefaultFromDB() {
 	userSettings.audioSettings.reciter = dbUserSettings["audioSettings.reciter"] ?? 10; // Mishary Rashid Alafasy
 	userSettings.audioSettings.translationReciter = dbUserSettings["audioSettings.translationReciter"] ?? 1; // English - Ibrahim Walk (Sahih International)
 	userSettings.audioSettings.playbackSpeed = dbUserSettings["audioSettings.playbackSpeed"] ?? 3; // x1
-	userSettings.audioSettings.playTranslation = !!(dbUserSettings["audioSettings.reciter"] ?? false); // Verse translation
+	userSettings.audioSettings.playTranslation = !!(dbUserSettings["audioSettings.playTranslation"] ?? false); // Verse translation
 	userSettings.audioSettings.versePlayButton = dbUserSettings["audioSettings.versePlayButton"] ?? 1; // Play selected verse
 
 	// Quiz settings
