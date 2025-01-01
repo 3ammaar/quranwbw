@@ -5,7 +5,7 @@ import { __pbAuth, __syncErrorNotificationVisible, __syncLoadingStates } from '$
 import { setUserSettings } from '$src/hooks.client';
 
 export function dbSubscribe() {
-  pb.health.check().then(health => { if (health.code == 200) {
+  pb.health.check({ requestKey: "authSubscribe" }).then(health => { if (health.code == 200) {
     pb.collection("users").subscribe("*", () => {
       if (pb.authStore.isValid) pb.collection("users").authRefresh()
         .catch(error => {
@@ -23,7 +23,7 @@ export function dbSubscribe() {
   const wordHifdhCardUpSync = liveQuery(() => db.wordHifdhCard.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
-      pb.health.check().then(health => { if (health.code == 200) {
+      pb.health.check({ requestKey: "wordHifdhCardUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "wordHifdhCardUpSync": true}));
 
         const batch = pb.createBatch();
@@ -80,7 +80,7 @@ export function dbSubscribe() {
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
-      pb.health.check().then(health => { if (health.code == 200) {
+      pb.health.check({ requestKey: "userBookmarkUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "userBookmarkUpSync": true}));
 
         const batch = pb.createBatch();
@@ -127,7 +127,7 @@ export function dbSubscribe() {
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
-      pb.health.check().then(health => { if (health.code == 200) {
+      pb.health.check({ requestKey: "userNoteUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "userNoteUpSync": true}));
 
         const batch = pb.createBatch();
@@ -175,7 +175,7 @@ export function dbSubscribe() {
     next: result => {
       if (!pb.authStore.isValid || !result?.length) return;
 
-      pb.health.check().then(health => { if (health.code == 200) {
+      pb.health.check({ requestKey: "userFavouriteChapterUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "userFavouriteChapterUpSync": true}));
 
         const batch = pb.createBatch();
@@ -227,7 +227,7 @@ export function dbSubscribe() {
         else lastReadLastSynced = new Date();
       }
 
-      pb.health.check().then(health => { if (health.code == 200) {
+      pb.health.check({ requestKey: "userSettingUpSync" }).then(health => { if (health.code == 200) {
         if (result.length != 1 || result[0].name != "lastRead") {
           __syncLoadingStates.update(current => ({...current, "userSettingUpSync": true}));
         }
@@ -562,11 +562,12 @@ export async function downSyncFromDate(date) {
 export async function downSync() {
   if (!pb.authStore.isValid) return;
 
-  const health = await pb.health.check().catch(error => {
+  const health = await pb.health.check({ requestKey: "downSync" }).catch(error => {
     console.log(error);
     __syncErrorNotificationVisible.set(true);
   });
   if (health?.code != 200) {
+    console.log(health);
     __syncErrorNotificationVisible.set(true);
     return;
   };

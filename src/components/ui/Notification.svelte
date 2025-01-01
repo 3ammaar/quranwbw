@@ -21,9 +21,7 @@
         }
         else {
             const wasSynced = isSyncing;
-            console.log(wasSynced);
             isSyncing = false;
-            console.log(wasSynced);
             setTimeout(() => {
                 const states = Object.entries($__syncLoadingStates);
                 if (states.length) {
