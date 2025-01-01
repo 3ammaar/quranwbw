@@ -45,7 +45,7 @@
 
     $: {
         const visibleNotifications = [];
-        if (pb.authStore?.isValid) {
+        if (pb.authStore?.isValid && pb.authStore?.record?.verified) {
             if ($__syncErrorNotificationVisible && !errorDismissed) {
                 visibleNotifications.push({type: "error", message: "Syncing error - check your network connection and refresh the page to try again."})
             } else if (showSync && !syncDismissed) {

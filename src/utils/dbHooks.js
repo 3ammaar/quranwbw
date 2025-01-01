@@ -22,7 +22,7 @@ export function dbSubscribe() {
 
   const wordHifdhCardUpSync = liveQuery(() => db.wordHifdhCard.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
-      if (!pb.authStore.isValid || !result?.length) return;
+      if (!pb.authStore.isValid || !pb.authStore.record?.verified || !result?.length) return;
       pb.health.check({ requestKey: "wordHifdhCardUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "wordHifdhCardUpSync": true}));
 
@@ -78,7 +78,7 @@ export function dbSubscribe() {
 
   const userBookmarkUpSync = liveQuery(() => db.userBookmark.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
-      if (!pb.authStore.isValid || !result?.length) return;
+      if (!pb.authStore.isValid || !pb.authStore.record?.verified || !result?.length) return;
 
       pb.health.check({ requestKey: "userBookmarkUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "userBookmarkUpSync": true}));
@@ -125,7 +125,7 @@ export function dbSubscribe() {
 
   const userNoteUpSync = liveQuery(() => db.userNote.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
-      if (!pb.authStore.isValid || !result?.length) return;
+      if (!pb.authStore.isValid || !pb.authStore.record?.verified || !result?.length) return;
 
       pb.health.check({ requestKey: "userNoteUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "userNoteUpSync": true}));
@@ -173,7 +173,7 @@ export function dbSubscribe() {
 
   const userFavouriteChapterUpSync = liveQuery(() => db.userFavouriteChapter.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
-      if (!pb.authStore.isValid || !result?.length) return;
+      if (!pb.authStore.isValid || !pb.authStore.record?.verified || !result?.length) return;
 
       pb.health.check({ requestKey: "userFavouriteChapterUpSync" }).then(health => { if (health.code == 200) {
         __syncLoadingStates.update(current => ({...current, "userFavouriteChapterUpSync": true}));
@@ -221,7 +221,7 @@ export function dbSubscribe() {
   let lastReadLastSynced = new Date();
   const userSettingUpSync = liveQuery(() => db.userSetting.where("synced").notEqual(1).toArray()).subscribe({
     next: result => {
-      if (!pb.authStore.isValid || !result?.length) return;
+      if (!pb.authStore.isValid || !pb.authStore.record?.verified || !result?.length) return;
       if (result.length == 1 && result[0].name == "lastRead") {
         if ((new Date() - lastReadLastSynced) <= 10000) return;
         else lastReadLastSynced = new Date();
@@ -560,7 +560,7 @@ export async function downSyncFromDate(date) {
 }
 
 export async function downSync() {
-  if (!pb.authStore.isValid) return;
+  if (!pb.authStore.isValid || !pb.authStore.record?.verified) return;
 
   const health = await pb.health.check({ requestKey: "downSync" }).catch(error => {
     console.log(error);
